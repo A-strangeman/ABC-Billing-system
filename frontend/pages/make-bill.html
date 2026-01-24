@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Make a Bill - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .category-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(255,99,99,0.3);
+      background: linear-gradient(135deg, #fff, #fff7f7);
+    }
+    
+    .category-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+    
+    .category-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="company-title">ABC Company</h2>
+      <ul class="menu">
+        <li><a href="welcome.html">🏠 Dashboard</a></li>
+        <li class="active"><a href="make-bill.html">📝 Make a New Bill</a></li>
+        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
+        <li><a href="reports.html">📊 Reports</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>Select Category</h1>
+        <button onclick="history.back()" class="btn-back">← Back</button>
+      </header>
+
+      <div id="categoryContainer" class="category-grid">
+        <p class="loading">Loading categories from database...</p>
+        <button onclick="Store.refreshCatalog().then(() => location.reload())" class="btn-secondary">
+  🔄 Refresh Catalog
+</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="../store.js"></script>
+  <script>
+    // Category icons mapping
+    const categoryIcons = {
+      'Plumbing': '🚰',
+      'Wiring': '⚡',
+      'TMT': '🔩',
+      'Cement': '🏗️',
+      'Paint': '🎨',
+      'Tin': '📦',
+      'Ply': '🪵',
+      'Tile': '🔲',
+      'Pipe': '🔧',
+      'Door': '🚪',
+      'Manual': '✍️'
+    };
+
+    async function loadCategories() {
+      const container = document.getElementById('categoryContainer');
+      
+      try {
+        // Wait for catalog to load
+        if (Store.catalog.categories.length === 0) {
+          await Store.loadCatalog();
+        }
+        
+        const categories = Store.catalog.categories;
+        
+        if (categories.length === 0) {
+          container.innerHTML = '<p class="loading">No categories found. Please add categories in backend.</p>';
+          return;
+        }
+        
+        container.innerHTML = categories.map(cat => `
+          <div class="category-card" onclick="selectCategory('${cat._id}', '${cat.name}')">
+            <div class="category-icon">${categoryIcons[cat.name] || '📦'}</div>
+            <div class="category-name">${cat.name}</div>
+          </div>
+        `).join('');
+        
+        // Add manual entry option
+        container.innerHTML += `
+          <div class="category-card" onclick="selectCategory('manual', 'Manual')">
+            <div class="category-icon">✍️</div>
+            <div class="category-name">Manual Entry</div>
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        container.innerHTML = '<p class="loading">Error loading categories. Please check backend connection.</p>';
+      }
+    }
+
+    function selectCategory(categoryId, categoryName) {
+      // Store selected category
+      sessionStorage.setItem('selectedCategoryId', categoryId);
+      sessionStorage.setItem('selectedCategoryName', categoryName);
+      
+      // Navigate to billing page
+      window.location.href = 'billing.html';
+    }
+
+    // Load categories on page ready
+    document.addEventListener('DOMContentLoaded', loadCategories);
+  </script>
+</body>
+</html>

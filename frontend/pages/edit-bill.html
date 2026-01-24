@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Bills - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="company-title">ABC Company</h2>
+      <ul class="menu">
+        <li><a href="welcome.html">🏠 Dashboard</a></li>
+        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
+        <li class="active"><a href="edit-bill.html">✏️ Edit Bills</a></li>
+        <li><a href="reports.html">📊 Reports</a></li>
+        <li><a href="admin-catalog.html">⚙️ Manage Catalog</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>Saved Bills</h1>
+        <button onclick="history.back()" class="btn-back">← Back</button>
+      </header>
+
+      <section class="info">
+        <p>Click on any bill to view, edit, or delete it.</p>
+
+        <div class="filter-bar">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by customer name or bill number..."
+          />
+          <select id="sortSelect">
+            <option value="date-desc">Latest First</option>
+            <option value="date-asc">Oldest First</option>
+            <option value="amount-desc">Highest Amount</option>
+            <option value="amount-asc">Lowest Amount</option>
+          </select>
+        </div>
+
+        <div id="billListContainer" class="list-container">
+          <p class="loading">Loading bills...</p>
+        </div>
+
+        <div id="pagination" class="pagination"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JS FILES -->
+  <script src="../api.js"></script>
+  <script src="../store.js"></script>
+
+  <script>
+    let currentPage = 1;
+    let allBills = [];
+
+    async function loadBills() {
+      const container = document.getElementById("billListContainer");
+      container.innerHTML = "<p class='loading'>Loading bills...</p>";
+
+      try {
+        console.log("📋 Loading bills, page:", currentPage);
+        const data = await API.getAllBills(currentPage, 20);
+        console.log("✅ Bills loaded:", data);
+        
+        allBills = data.bills || [];
+
+        if (allBills.length === 0) {
+          container.innerHTML = "<p class='empty'>No bills found</p>";
+          return;
+        }
+
+        renderBills(allBills);
+        renderPagination(data.pages || 1);
+
+      } catch (error) {
+        console.error("❌ Error loading bills:", error);
+        container.innerHTML =
+          "<p class='error'>Error loading bills. Please try again.</p>";
+      }
+    }
+
+    function renderBills(bills) {
+      const container = document.getElementById("billListContainer");
+
+      container.innerHTML = bills.map(bill => `
+        <div class="bill-item" id="bill-${bill._id}">
+          <div class="bill-info">
+            <div class="bill-main">
+              <strong>Bill #${bill.estimateNo}</strong>
+              <span class="customer">${bill.customer?.name || "Unknown"}</span>
+            </div>
+            <div class="bill-meta">
+              <span class="date">
+                ${bill.date ? new Date(bill.date).toLocaleDateString() : "-"}
+              </span>
+              <span class="amount">₹${(bill.total || 0).toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="bill-actions">
+            <button onclick="viewBill('${bill._id}')">👁️ View</button>
+            <button onclick="editBill('${bill._id}')">✏️ Edit</button>
+            <button onclick="deleteBill('${bill._id}','${bill.estimateNo}')">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      if (totalPages <= 1) return;
+
+      if (currentPage > 1) {
+        pagination.innerHTML +=
+          `<button onclick="changePage(${currentPage - 1})">« Prev</button>`;
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        pagination.innerHTML += i === currentPage
+          ? `<button class="active">${i}</button>`
+          : `<button onclick="changePage(${i})">${i}</button>`;
+      }
+
+      if (currentPage < totalPages) {
+        pagination.innerHTML +=
+          `<button onclick="changePage(${currentPage + 1})">Next »</button>`;
+      }
+    }
+
+    function changePage(page) {
+      currentPage = page;
+      loadBills();
+    }
+
+    function viewBill(id) {
+      sessionStorage.setItem("viewBillId", id);
+      sessionStorage.setItem("viewOnly", "true");
+      window.location.href = "make-bill.html";
+    }
+
+    function editBill(id) {
+      sessionStorage.setItem("viewBillId", id);
+      sessionStorage.removeItem("viewOnly");
+      window.location.href = "make-bill.html";
+    }
+
+    async function deleteBill(id, no) {
+      if (!confirm(`Are you sure you want to delete Bill #${no}?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        console.log("🗑️ Attempting to delete bill:", id);
+        
+        // Disable delete button to prevent double-click
+        const billElement = document.getElementById(`bill-${id}`);
+        if (billElement) {
+          billElement.style.opacity = '0.5';
+          billElement.style.pointerEvents = 'none';
+        }
+        
+        const result = await API.deleteBill(id);
+        console.log("✅ Delete result:", result);
+        
+        if (result.success) {
+          alert(`✓ Bill #${no} deleted successfully!`);
+          
+          // Remove from UI immediately
+          if (billElement) {
+            billElement.remove();
+          }
+          
+          // Reload bills to refresh the list
+          await loadBills();
+        } else {
+          throw new Error(result.message || "Failed to delete bill");
+        }
+        
+      } catch (error) {
+        console.error("❌ Error deleting bill:", error);
+        alert(`Error: ${error.message || "Failed to delete bill. Please try again."}`);
+        
+        // Re-enable the bill element if delete failed
+        const billElement = document.getElementById(`bill-${id}`);
+        if (billElement) {
+          billElement.style.opacity = '1';
+          billElement.style.pointerEvents = 'auto';
+        }
+      }
+    }
+
+    document.getElementById("searchInput").addEventListener("input", e => {
+      const q = e.target.value.toLowerCase();
+      renderBills(
+        allBills.filter(b =>
+          b.estimateNo.toString().includes(q) ||
+          (b.customer?.name || "").toLowerCase().includes(q)
+        )
+      );
+    });
+
+    document.getElementById("sortSelect").addEventListener("change", e => {
+      const sorted = [...allBills];
+      if (e.target.value === "date-desc") sorted.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      if (e.target.value === "date-asc") sorted.sort((a,b)=>new Date(a.date)-new Date(b.date));
+      if (e.target.value === "amount-desc") sorted.sort((a,b)=>(b.total||0)-(a.total||0));
+      if (e.target.value === "amount-asc") sorted.sort((a,b)=>(a.total||0)-(b.total||0));
+      renderBills(sorted);
+    });
+
+    document.addEventListener("DOMContentLoaded", loadBills);
+  </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Catalog - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .admin-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .admin-section h3 {
+      color: #ff6363;
+      margin-bottom: 15px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .form-row input, .form-row select {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    
+    .form-row button {
+      padding: 8px 16px;
+      background: #ff6363;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .form-row button:hover {
+      background: #ff4545;
+    }
+
+    .form-row button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .item-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+    
+    .item-chip {
+      display: inline-flex;
+      align-items: center;
+      background: #f1f1f3;
+      padding: 6px 12px;
+      margin: 4px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+    }
+    
+    .item-chip button {
+      margin-left: 8px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+    }
+
+    .item-chip button:hover {
+      background: #d32f2f;
+    }
+
+    .loading-msg {
+      color: #999;
+      font-style: italic;
+      padding: 10px;
+    }
+
+    .error-msg {
+      color: #f44336;
+      padding: 10px;
+    }
+
+    .success-msg {
+      color: #4caf50;
+      padding: 10px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .success-msg.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="company-title">ABC Company</h2>
+      <ul class="menu">
+        <li><a href="welcome.html">🏠 Dashboard</a></li>
+        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
+        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
+        <li><a href="reports.html">📊 Reports</a></li>
+        <li class="active"><a href="admin-catalog.html">⚙️ Manage Catalog</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>⚙️ Manage Catalog</h1>
+        <button onclick="history.back()" class="btn-back">← Back</button>
+      </header>
+
+      <div class="admin-grid">
+        <!-- CATEGORY SECTION -->
+        <div class="admin-section">
+          <h3>📁 Categories</h3>
+          <div class="form-row">
+            <input type="text" id="categoryName" placeholder="Category name">
+            <button onclick="addCategory()" id="addCategoryBtn">Add</button>
+          </div>
+          <div class="success-msg" id="categorySuccess">✓ Category added!</div>
+          <div class="item-list" id="categoryList">
+            <div class="loading-msg">Loading...</div>
+          </div>
+        </div>
+
+        <!-- MATERIAL SECTION -->
+        <div class="admin-section">
+          <h3>🔧 Materials</h3>
+          <div class="form-row">
+            <select id="materialCategory">
+              <option value="">Select category</option>
+            </select>
+            <input type="text" id="materialName" placeholder="Material name">
+            <button onclick="addMaterial()" id="addMaterialBtn">Add</button>
+          </div>
+          <div class="success-msg" id="materialSuccess">✓ Material added!</div>
+          <div class="item-list" id="materialList">
+            <div class="loading-msg">Loading...</div>
+          </div>
+        </div>
+
+        <!-- SIZE SECTION -->
+        <div class="admin-section">
+          <h3>📏 Sizes</h3>
+          <div class="form-row">
+            <select id="sizeMaterial">
+              <option value="">Select material</option>
+            </select>
+            <input type="text" id="sizeValue" placeholder="Size value">
+            <button onclick="addSize()" id="addSizeBtn">Add</button>
+          </div>
+          <div class="success-msg" id="sizeSuccess">✓ Size added!</div>
+          <div class="item-list" id="sizeList">
+            <div class="loading-msg">Loading...</div>
+          </div>
+        </div>
+
+        <!-- FITTING SECTION -->
+        <div class="admin-section">
+          <h3>🔩 Fittings</h3>
+          <div class="form-row">
+            <select id="fittingMaterial">
+              <option value="">Select material</option>
+            </select>
+            <input type="text" id="fittingName" placeholder="Fitting name">
+            <button onclick="addFitting()" id="addFittingBtn">Add</button>
+          </div>
+          <div class="success-msg" id="fittingSuccess">✓ Fitting added!</div>
+          <div class="item-list" id="fittingList">
+            <div class="loading-msg">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../api.js"></script>
+  <script>
+    let catalog = { categories: [], materials: [], sizes: [], fittings: [] };
+
+    // ============================================
+    // LOAD CATALOG
+    // ============================================
+    async function loadCatalog() {
+      try {
+        console.log("📦 Loading catalog...");
+        catalog = await API.getCatalog();
+        console.log("✅ Catalog loaded:", catalog);
+        renderAll();
+      } catch (error) {
+        console.error("❌ Error loading catalog:", error);
+        showError("Failed to load catalog");
+      }
+    }
+
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    function renderAll() {
+      renderCategories();
+      renderMaterials();
+      renderSizes();
+      renderFittings();
+      populateDropdowns();
+    }
+
+    function renderCategories() {
+      const list = document.getElementById('categoryList');
+      
+      if (!catalog.categories || catalog.categories.length === 0) {
+        list.innerHTML = '<div class="loading-msg">No categories yet</div>';
+        return;
+      }
+
+      list.innerHTML = catalog.categories.map(cat => `
+        <span class="item-chip">
+          ${cat.name}
+          <button onclick="deleteCategory('${cat._id}')" title="Delete">×</button>
+        </span>
+      `).join('');
+    }
+
+    function renderMaterials() {
+      const list = document.getElementById('materialList');
+      
+      if (!catalog.materials || catalog.materials.length === 0) {
+        list.innerHTML = '<div class="loading-msg">No materials yet</div>';
+        return;
+      }
+
+      list.innerHTML = catalog.materials.map(mat => {
+        const cat = catalog.categories.find(c => c._id === mat.categoryId);
+        return `
+          <span class="item-chip">
+            ${cat?.name || 'Unknown'} → ${mat.name}
+            <button onclick="deleteMaterial('${mat._id}')" title="Delete">×</button>
+          </span>
+        `;
+      }).join('');
+    }
+
+    function renderSizes() {
+      const list = document.getElementById('sizeList');
+      
+      if (!catalog.sizes || catalog.sizes.length === 0) {
+        list.innerHTML = '<div class="loading-msg">No sizes yet</div>';
+        return;
+      }
+
+      list.innerHTML = catalog.sizes.map(size => {
+        const mat = catalog.materials.find(m => m._id === size.materialId);
+        return `
+          <span class="item-chip">
+            ${mat?.name || 'Unknown'} → ${size.value}
+            <button onclick="deleteSize('${size._id}')" title="Delete">×</button>
+          </span>
+        `;
+      }).join('');
+    }
+
+    function renderFittings() {
+      const list = document.getElementById('fittingList');
+      
+      if (!catalog.fittings || catalog.fittings.length === 0) {
+        list.innerHTML = '<div class="loading-msg">No fittings yet</div>';
+        return;
+      }
+
+      list.innerHTML = catalog.fittings.map(fit => {
+        const mat = catalog.materials.find(m => m._id === fit.materialId);
+        return `
+          <span class="item-chip">
+            ${mat?.name || 'Unknown'} → ${fit.name}
+            <button onclick="deleteFitting('${fit._id}')" title="Delete">×</button>
+          </span>
+        `;
+      }).join('');
+    }
+
+    function populateDropdowns() {
+      // Populate category dropdown for materials
+      const catSelect = document.getElementById('materialCategory');
+      catSelect.innerHTML = '<option value="">Select category</option>' +
+        (catalog.categories || []).map(c => 
+          `<option value="${c._id}">${c.name}</option>`
+        ).join('');
+
+      // Populate material dropdowns for sizes and fittings
+      const matOptions = '<option value="">Select material</option>' +
+        (catalog.materials || []).map(m => 
+          `<option value="${m._id}">${m.name}</option>`
+        ).join('');
+      
+      document.getElementById('sizeMaterial').innerHTML = matOptions;
+      document.getElementById('fittingMaterial').innerHTML = matOptions;
+    }
+
+    // ============================================
+    // ADD FUNCTIONS
+    // ============================================
+    async function addCategory() {
+      const name = document.getElementById('categoryName').value.trim();
+      const btn = document.getElementById('addCategoryBtn');
+      
+      if (!name) {
+        alert('Please enter category name');
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+        
+        console.log("➕ Adding category:", name);
+        await API.addCategory({ name });
+        
+        document.getElementById('categoryName').value = '';
+        showSuccess('categorySuccess');
+        
+        // Reload catalog to get updated data
+        await loadCatalog();
+        
+      } catch (error) {
+        console.error("❌ Error adding category:", error);
+        alert('Failed to add category: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add';
+      }
+    }
+
+    async function addMaterial() {
+      const categoryId = document.getElementById('materialCategory').value;
+      const name = document.getElementById('materialName').value.trim();
+      const btn = document.getElementById('addMaterialBtn');
+      
+      if (!categoryId) {
+        alert('Please select a category');
+        return;
+      }
+      if (!name) {
+        alert('Please enter material name');
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+        
+        console.log("➕ Adding material:", { categoryId, name });
+        await API.addMaterial({ categoryId, name });
+        
+        document.getElementById('materialName').value = '';
+        showSuccess('materialSuccess');
+        
+        await loadCatalog();
+        
+      } catch (error) {
+        console.error("❌ Error adding material:", error);
+        alert('Failed to add material: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add';
+      }
+    }
+
+    async function addSize() {
+      const materialId = document.getElementById('sizeMaterial').value;
+      const value = document.getElementById('sizeValue').value.trim();
+      const btn = document.getElementById('addSizeBtn');
+      
+      if (!materialId) {
+        alert('Please select a material');
+        return;
+      }
+      if (!value) {
+        alert('Please enter size value');
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+        
+        console.log("➕ Adding size:", { materialId, value });
+        await API.addSize({ materialId, value });
+        
+        document.getElementById('sizeValue').value = '';
+        showSuccess('sizeSuccess');
+        
+        await loadCatalog();
+        
+      } catch (error) {
+        console.error("❌ Error adding size:", error);
+        alert('Failed to add size: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add';
+      }
+    }
+
+    async function addFitting() {
+      const materialId = document.getElementById('fittingMaterial').value;
+      const name = document.getElementById('fittingName').value.trim();
+      const btn = document.getElementById('addFittingBtn');
+      
+      if (!materialId) {
+        alert('Please select a material');
+        return;
+      }
+      if (!name) {
+        alert('Please enter fitting name');
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+        
+        console.log("➕ Adding fitting:", { materialId, name });
+        await API.addFitting({ materialId, name });
+        
+        document.getElementById('fittingName').value = '';
+        showSuccess('fittingSuccess');
+        
+        await loadCatalog();
+        
+      } catch (error) {
+        console.error("❌ Error adding fitting:", error);
+        alert('Failed to add fitting: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add';
+      }
+    }
+
+    // ============================================
+    // DELETE FUNCTIONS (PLACEHOLDER)
+    // ============================================
+    async function deleteCategory(id) {
+      if (!confirm('Delete this category?')) return;
+      alert('Delete functionality needs backend route: DELETE /api/catalog/categories/:id');
+    }
+
+    async function deleteMaterial(id) {
+      if (!confirm('Delete this material?')) return;
+      alert('Delete functionality needs backend route: DELETE /api/catalog/materials/:id');
+    }
+
+    async function deleteSize(id) {
+      if (!confirm('Delete this size?')) return;
+      alert('Delete functionality needs backend route: DELETE /api/catalog/sizes/:id');
+    }
+
+    async function deleteFitting(id) {
+      if (!confirm('Delete this fitting?')) return;
+      alert('Delete functionality needs backend route: DELETE /api/catalog/fittings/:id');
+    }
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    function showSuccess(elementId) {
+      const elem = document.getElementById(elementId);
+      elem.classList.add('show');
+      setTimeout(() => {
+        elem.classList.remove('show');
+      }, 3000);
+    }
+
+    function showError(message) {
+      alert('Error: ' + message);
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    loadCatalog();
+  </script>
+</body>
+</html>

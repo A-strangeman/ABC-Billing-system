@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="company-title">ABC Company</h2>
+      <ul class="menu">
+        <li class="active"><a href="welcome.html">🏠 Dashboard</a></li>
+        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
+        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
+        <li><a href="reports.html">📊 Reports</a></li>
+        <li><a href="admin-catalog.html">⚙️ Manage Catalog</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <header>
+        <h1>Welcome to ABC Company</h1>
+        <button id="logoutBtn" class="btn-logout">Logout</button>
+      </header>
+      
+      <section class="welcome-grid">
+        <!-- Quick Stats -->
+        <div class="stat-card">
+          <h3>Today's Bills</h3>
+          <p class="stat-number" id="todayBills">0</p>
+        </div>
+        
+        <div class="stat-card">
+          <h3>This Month</h3>
+          <p class="stat-number" id="monthBills">0</p>
+        </div>
+        
+        <div class="stat-card">
+          <h3>Drafts Saved</h3>
+          <p class="stat-number" id="draftCount">0</p>
+        </div>
+        
+        <div class="stat-card">
+          <h3>Total Revenue</h3>
+          <p class="stat-number" id="totalRevenue">₹0</p>
+        </div>
+      </section>
+
+      <!-- Recent Drafts -->
+      <section class="info-section">
+        <h2>📝 Recent Drafts</h2>
+        <div id="draftsList" class="list-container">
+          <p class="loading">Loading drafts...</p>
+        </div>
+      </section>
+
+      <!-- Recent Bills -->
+      <section class="info-section">
+        <h2>📋 Recent Bills</h2>
+        <div id="billsList" class="list-container">
+          <p class="loading">Loading bills...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="../store.js"></script>
+  <script src="../router.js"></script>
+  <script>
+    // Get bill total with fallback for different field names
+    function getBillTotal(bill) {
+      return bill.total || bill.grandTotal || bill.totalAmount || 0;
+    }
+
+    // Load dashboard data
+    async function loadDashboard() {
+      try {
+        console.log("📊 Loading dashboard data...");
+
+        // Load drafts
+        const drafts = await API.getAllDrafts();
+        console.log("📝 Drafts loaded:", drafts);
+        document.getElementById('draftCount').textContent = drafts.length;
+        
+        const draftsList = document.getElementById('draftsList');
+        if (drafts.length === 0) {
+          draftsList.innerHTML = '<p class="empty">No drafts saved</p>';
+        } else {
+          draftsList.innerHTML = drafts.slice(0, 3).map(draft => `
+            <div class="list-item" onclick="editDraft('${draft._id}')">
+              <strong>Draft ${draft.estimateNo || 'Untitled'}</strong>
+              <span>${draft.customer?.name || 'No customer'}</span>
+              <span class="date">${new Date(draft.createdAt || draft.savedAt).toLocaleDateString()}</span>
+            </div>
+          `).join('');
+        }
+        
+        // Load recent bills
+        const billsResponse = await API.getAllBills(1, 20);
+        console.log("📋 Bills response:", billsResponse);
+        
+        // Handle different response formats
+        let bills = [];
+        if (Array.isArray(billsResponse)) {
+          bills = billsResponse;
+        } else if (billsResponse.bills && Array.isArray(billsResponse.bills)) {
+          bills = billsResponse.bills;
+        } else if (billsResponse.data && Array.isArray(billsResponse.data)) {
+          bills = billsResponse.data;
+        }
+        
+        console.log("✅ Bills array:", bills);
+        
+        const billsList = document.getElementById('billsList');
+        if (bills.length === 0) {
+          billsList.innerHTML = '<p class="empty">No bills yet</p>';
+        } else {
+          billsList.innerHTML = bills.slice(0, 5).map(bill => `
+            <div class="list-item" onclick="viewBill('${bill._id}')">
+              <strong>Bill #${bill.estimateNo}</strong>
+              <span>${bill.customer?.name || 'Unknown'}</span>
+              <span class="amount">₹${getBillTotal(bill).toFixed(2)}</span>
+            </div>
+          `).join('');
+        }
+        
+        // Calculate stats
+        const today = new Date().toISOString().split('T')[0];
+        const todayBills = bills.filter(b => b.date === today);
+        document.getElementById('todayBills').textContent = todayBills.length;
+        
+        const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+        const monthBills = bills.filter(b => {
+          const billDate = new Date(b.date || b.createdAt);
+          return billDate.getMonth() === thisMonth && billDate.getFullYear() === thisYear;
+        });
+        document.getElementById('monthBills').textContent = monthBills.length;
+        
+        // Calculate total revenue
+        const totalRevenue = bills.reduce((sum, b) => sum + getBillTotal(b), 0);
+        document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
+        
+        console.log("✅ Dashboard loaded successfully");
+        
+      } catch (error) {
+        console.error('❌ Error loading dashboard:', error);
+        document.getElementById('draftsList').innerHTML = '<p class="empty" style="color: red;">Error loading drafts</p>';
+        document.getElementById('billsList').innerHTML = '<p class="empty" style="color: red;">Error loading bills</p>';
+      }
+    }
+    
+    function editDraft(draftId) {
+      console.log("Editing draft:", draftId);
+      sessionStorage.setItem('editDraftId', draftId);
+      window.location.href = 'make-bill.html';
+    }
+    
+    function viewBill(billId) {
+      console.log("Viewing bill:", billId);
+      sessionStorage.setItem('viewBillId', billId);
+      window.location.href = 'edit-bill.html';
+    }
+    
+    // Load on page ready
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+    
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      if (confirm('Are you sure you want to logout?')) {
+        window.location.href = '../index.html';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Bill - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="billing-header">ABC Company – Estimate Bill</header>
+
+  <div class="layout">
+    <!-- LEFT PANEL - Bill Form -->
+    <div class="left">
+      <h2>Estimated Bill</h2>
+
+      <!-- Bill Header Info -->
+      <div class="bill-header">
+        <div>
+          <label>Estimate No.</label>
+          <input type="text" id="estimateNo" readonly />
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" id="billDate" />
+        </div>
+        <div>
+          <label>Customer Name</label>
+          <input type="text" id="customerName" placeholder="Start typing..." list="customerList" />
+          <datalist id="customerList"></datalist>
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="text" id="customerPhone" placeholder="Auto-filled" />
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <table id="billTable">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Price/Unit (₹)</th>
+            <th>% +/-</th>  <!-- NEW COLUMN -->
+            <th>Amount (₹)</th>
+            <th>Action</th>
+          </tr>
+      </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Action Buttons -->
+      <div class="actions">
+        <button id="addRowBtn" class="btn-secondary">+ Add Row</button>
+        <button id="applyPercentBtn" class="btn-info">📊 Apply % to All</button>  <!-- NEW BUTTON -->
+        <button id="saveDraftBtn" class="btn-secondary">💾 Save Draft</button>
+        <button id="downloadBtn" class="btn-primary">⬇️ Download PDF</button>
+        <button id="saveBtn" class="btn-success">✓ Save & Finalize</button>
+      </div>
+
+      <!-- Totals Section -->
+      <div class="totals">
+        <div>
+          <label>Sub Total (Rs)</label>
+          <input type="text" id="subTotal" readonly />
+        </div>
+        
+        <div>
+          <label>Discount (%)</label>
+          <input type="number" id="discountPercent" value="0" min="0" max="100" step="0.01" />
+        </div>
+        
+        <div>
+          <label>Discount (Rs)</label>
+          <input type="number" id="discountRs" value="0" min="0" step="0.01" />
+        </div>
+        
+        <div>
+          <label>Grand Total (Rs)</label>
+          <input type="text" id="grandTotal" readonly />
+        </div>
+        
+        <div>
+          <label>Received (Rs)</label>
+          <input type="number" id="received" value="0" min="0" step="0.01" />
+        </div>
+        
+        <div>
+          <label>Balance (Rs)</label>
+          <input type="text" id="balance" readonly />
+        </div>
+      </div>
+
+      <div class="amount-words">
+        <label>Amount in Words</label>
+        <textarea id="amountWords" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL - Dynamic Product Builder -->
+    <div class="right">
+      <div class="note">
+        💡 Click a row on the left to select it. Then choose category → material → size → fitting to build the product name automatically.
+      </div>
+
+      <!-- Categories -->
+      <div class="section-title">Category</div>
+      <div class="chip-row" id="categoryRow">
+        <p class="loading">Loading categories...</p>
+      </div>
+
+      <!-- Materials (Dynamic) -->
+      <div id="materialSection" style="display: none;">
+        <div class="section-title">Material</div>
+        <div class="chip-row" id="materialRow"></div>
+      </div>
+
+      <!-- Sizes (Dynamic) -->
+      <div id="sizeSection" style="display: none;">
+        <div class="section-title">Size</div>
+        <div class="chip-row" id="sizeRow"></div>
+      </div>
+
+      <!-- Fittings (Dynamic) -->
+      <div id="fittingSection" style="display: none;">
+        <div class="section-title">Fitting</div>
+        <div class="chip-row" id="fittingRow"></div>
+      </div>
+
+      <!-- Price Suggestions -->
+      <div id="priceSection" style="display: none;">
+        <div class="section-title">Suggested Prices</div>
+        <div class="chip-row" id="priceRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="../api.js"></script>
+  <script src="../store.js"></script>
+  <script src="../js/billing.js"></script>
+</body>
+</html>

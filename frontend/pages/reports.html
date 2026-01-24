@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports - ABC Company</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/reports.css">
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="company-title">ABC Company</h2>
+      <ul class="menu">
+        <li><a href="welcome.html">🏠 Dashboard</a></li>
+        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
+        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
+        <li class="active"><a href="reports.html">📊 Reports</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>📊 Business Reports</h1>
+        <button onclick="window.print()" class="btn-print">🖨️ Print Report</button>
+      </header>
+
+      <!-- Filter Section -->
+      <section class="filter-section">
+        <h3>📅 Date Range</h3>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>From</label>
+            <input type="date" id="dateFrom" />
+          </div>
+          <div class="filter-group">
+            <label>To</label>
+            <input type="date" id="dateTo" />
+          </div>
+          <button id="applyFilter" class="btn-primary">Apply Filter</button>
+          <button id="resetFilter" class="btn-secondary">Reset</button>
+        </div>
+        
+        <div class="quick-filters">
+          <button class="quick-btn" data-period="today">Today</button>
+          <button class="quick-btn" data-period="week">This Week</button>
+          <button class="quick-btn" data-period="month">This Month</button>
+          <button class="quick-btn" data-period="year">This Year</button>
+        </div>
+      </section>
+
+      <!-- Key Metrics Cards -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon">💰</div>
+          <div class="metric-content">
+            <h4>Total Revenue</h4>
+            <p class="metric-value" id="totalRevenue">₹0.00</p>
+            <span class="metric-change positive" id="revenueChange">+0%</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">📋</div>
+          <div class="metric-content">
+            <h4>Total Bills</h4>
+            <p class="metric-value" id="totalBills">0</p>
+            <span class="metric-change" id="billsChange">+0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">👥</div>
+          <div class="metric-content">
+            <h4>Unique Customers</h4>
+            <p class="metric-value" id="uniqueCustomers">0</p>
+            <span class="metric-change" id="customersChange">+0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">📊</div>
+          <div class="metric-content">
+            <h4>Average Bill</h4>
+            <p class="metric-value" id="avgBill">₹0.00</p>
+            <span class="metric-change" id="avgChange">+0%</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">💸</div>
+          <div class="metric-content">
+            <h4>Total Discount</h4>
+            <p class="metric-value" id="totalDiscount">₹0.00</p>
+            <span class="metric-percentage" id="discountPercent">0%</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">⚠️</div>
+          <div class="metric-content">
+            <h4>Pending Balance</h4>
+            <p class="metric-value" id="pendingBalance">₹0.00</p>
+            <span class="metric-percentage" id="balancePercent">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="charts-section">
+        <div class="chart-container">
+          <h3>📈 Revenue Trend</h3>
+          <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h3>🥧 Top Customers</h3>
+          <canvas id="customerChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h3>📦 Top Products</h3>
+          <div id="productsList" class="products-list">
+            <p class="loading">Loading products...</p>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>💳 Payment Status</h3>
+          <canvas id="paymentChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Detailed Tables -->
+      <section class="tables-section">
+        <div class="table-container">
+          <h3>📋 Recent Bills</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Bill #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Amount</th>
+                <th>Discount</th>
+                <th>Total</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="billsTableBody">
+              <tr><td colspan="8" class="loading">Loading bills...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-container">
+          <h3>👥 Customer Summary</h3>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Customer Name</th>
+                <th>Total Bills</th>
+                <th>Total Amount</th>
+                <th>Avg Bill</th>
+                <th>Pending</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody">
+              <tr><td colspan="5" class="loading">Loading customers...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Export Options -->
+      <section class="export-section">
+        <h3>📥 Export Reports</h3>
+        <div class="export-buttons">
+          <button id="exportPDF" class="btn-export">📄 Export as PDF</button>
+          <button id="exportExcel" class="btn-export">📊 Export as Excel</button>
+          <button id="exportCSV" class="btn-export">📋 Export as CSV</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="../api.js"></script>
+  <script src="../store.js"></script>
+  <script src="../js/reports.js"></script>
+</body>
+</html>

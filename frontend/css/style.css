@@ -1,0 +1,644 @@
+/* ============================================
+   MODERN BILLING SYSTEM - COMPLETE STYLES
+   ============================================ */
+
+:root {
+  --accent: #FF6363;
+  --accent-dark: #e05252;
+  --success: #4CAF50;
+  --warning: #FFC107;
+  --danger: #f44336;
+  --input-bg: #f1f1f3;
+  --text: #111;
+  --muted: #777;
+  --card: #fff;
+  --radius: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --sidebar-bg: linear-gradient(160deg, #ff7a7a, #ff6363);
+  --background: #f7f7f9;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ============================================
+   DASHBOARD LAYOUT
+   ============================================ */
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  padding: 25px 15px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+}
+
+.company-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.menu {
+  list-style: none;
+}
+
+.menu li {
+  margin-bottom: 10px;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 1rem;
+  display: block;
+  padding: 12px 15px;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.1);
+}
+
+.menu a:hover,
+.menu li.active a {
+  background: #fff;
+  color: var(--accent);
+  transform: translateX(5px);
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+
+.content {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+  background: var(--background);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+header h1 {
+  color: var(--accent);
+  font-size: 1.8rem;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+button {
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+
+.btn-primary, #addRowBtn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover, #addRowBtn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255,99,99,0.3);
+}
+
+.btn-secondary, #saveDraftBtn, #downloadBtn {
+  background: #777;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background: #555;
+}
+
+.btn-success, #saveBtn {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #45a049;
+}
+
+.btn-logout, .btn-back {
+  background: #333;
+  color: #fff;
+  padding: 8px 16px;
+}
+
+.btn-logout:hover, .btn-back:hover {
+  background: #555;
+}
+
+/* ============================================
+   WELCOME PAGE - STATS
+   ============================================ */
+
+.welcome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 25px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ============================================
+   INFO SECTIONS
+   ============================================ */
+
+.info-section {
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.info-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.list-container {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.list-item:hover {
+  background: #f9f9f9;
+}
+
+.list-item strong {
+  color: var(--accent);
+  margin-right: 10px;
+}
+
+.list-item .date,
+.list-item .amount {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ============================================
+   BILLING PAGE LAYOUT
+   ============================================ */
+
+.billing-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 15px 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.layout {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.left {
+  flex: 2;
+  background: var(--card);
+  margin: 15px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.right {
+  flex: 1;
+  background: var(--card);
+  margin: 15px 15px 15px 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.bill-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+input[readonly] {
+  background: #f9f9f9;
+  cursor: not-allowed;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+thead th {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: #f9f9f9;
+}
+
+tbody tr.active {
+  background: #fff7f7;
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.row-total {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.del {
+  background: var(--danger);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  border-radius: 6px;
+}
+
+.del:hover {
+  background: #d32f2f;
+}
+
+/* ============================================
+   ACTIONS & TOTALS
+   ============================================ */
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.amount-words {
+  margin-top: 15px;
+}
+
+/* ============================================
+   RIGHT PANEL - PRODUCT BUILDER
+   ============================================ */
+
+.note {
+  background: #fff9e6;
+  border-left: 4px solid var(--warning);
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 15px 0 10px;
+  color: #333;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.chip {
+  background: #f1f1f3;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip:hover {
+  background: #e8e8ea;
+  transform: translateY(-1px);
+}
+
+.chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.price-chip {
+  background: #e8f5e9;
+  border-color: var(--success);
+}
+
+.price-chip:hover {
+  background: var(--success);
+  color: #fff;
+}
+
+/* ============================================
+   BILL LIST & FILTER
+   ============================================ */
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.filter-bar input {
+  flex: 1;
+}
+
+.filter-bar select {
+  width: 200px;
+}
+
+.bill-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.bill-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.bill-info {
+  flex: 1;
+}
+
+.bill-main {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 5px;
+}
+
+.bill-main strong {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.bill-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.bill-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-view, .btn-edit, .btn-delete {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-view {
+  background: #2196F3;
+  color: #fff;
+}
+
+.btn-edit {
+  background: var(--warning);
+  color: #fff;
+}
+
+.btn-delete {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  background: #f1f1f3;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.pagination button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 968px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .right {
+    margin: 0 15px 15px;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+  }
+  
+  .dashboard {
+    flex-direction: column;
+    height: auto;
+  }
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-info:hover {
+  background: #138496;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.success {
+  color: var(--success);
+}
