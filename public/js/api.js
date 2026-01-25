@@ -1,48 +1,56 @@
 // ============================================
-// API.JS - COMPLETE VERSION with Reports
+// API.JS – VERCEL SAFE + NO AUTO LOGOUT
 // ============================================
 
-// Automatically use the right URL based on where the site is running
+// Auto-detect API base
 const API_BASE = (() => {
-  // Check if running on Vercel
-  if (window.location.hostname.includes('vercel.app')) {
-    return window.location.origin + '/api';
+  if (window.location.hostname.includes("vercel.app")) {
+    return `${window.location.origin}/api`;
   }
-  
-  // Local development
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  ) {
+    return "http://localhost:5000/api";
   }
-  
-  // Fallback to relative URL
-  return '/api';
+  return "/api";
 })();
 
-console.log('🔗 API Base URL:', API_BASE);
+console.log("🔗 API BASE:", API_BASE);
 
-// Helper function to get auth headers
+// ============================================
+// AUTH HEADER HELPER
+// ============================================
 function getAuthHeaders() {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
+
   return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
   };
 }
 
+// ============================================
+// API OBJECT
+// ============================================
 const API = {
-  // ============================================
-  // AUTHENTICATION
-  // ============================================
+
+  // ---------- AUTH ----------
   async login(username, password) {
     const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw data;
+
+    // 🔐 Save token
+    if (data.token) {
+      localStorage.setItem("authToken", data.token);
+    }
+
     return data;
   },
 
@@ -50,26 +58,32 @@ const API = {
     const res = await fetch(`${API_BASE}/auth/verify`, {
       headers: getAuthHeaders()
     });
-    
-    if (!res.ok) throw await res.json();
+
+    if (!res.ok) {
+      localStorage.removeItem("authToken");
+      throw await res.json();
+    }
+
     return res.json();
+  },
+
+  logout() {
+    localStorage.removeItem("authToken");
   },
 
   async changePassword(oldPassword, newPassword) {
     const res = await fetch(`${API_BASE}/auth/change-password`, {
-      method: 'POST',
+      method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({ oldPassword, newPassword })
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw data;
     return data;
   },
 
-  // ============================================
-  // CATALOG
-  // ============================================
+  // ---------- CATALOG ----------
   async getCatalog() {
     const res = await fetch(`${API_BASE}/catalog`, {
       headers: getAuthHeaders()
@@ -78,128 +92,31 @@ const API = {
     return res.json();
   },
 
-  async getMaterialsByCategory(categoryId) {
-    const res = await fetch(`${API_BASE}/catalog/materials/${categoryId}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  async getSizesByMaterial(materialId) {
-    const res = await fetch(`${API_BASE}/catalog/sizes/${materialId}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  async getFittingsByMaterial(materialId) {
-    const res = await fetch(`${API_BASE}/catalog/fittings/${materialId}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  // ============================================
-  // CATALOG MANAGEMENT
-  // ============================================
-  async addCategory(data) {
-    const res = await fetch(`${API_BASE}/catalog/categories`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data)
-    });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
-  },
-
-  async addMaterial(data) {
-    const res = await fetch(`${API_BASE}/catalog/materials`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data)
-    });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
-  },
-
-  async addSize(data) {
-    const res = await fetch(`${API_BASE}/catalog/sizes`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data)
-    });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
-  },
-
-  async addFitting(data) {
-    const res = await fetch(`${API_BASE}/catalog/fittings`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data)
-    });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
-  },
-
-  async deleteCategory(id) {
-    const res = await fetch(`${API_BASE}/catalog/categories/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
-  },
-
-  async deleteMaterial(id) {
+  async getMaterialsByCategory(id) {
     const res = await fetch(`${API_BASE}/catalog/materials/${id}`, {
-      method: 'DELETE',
       headers: getAuthHeaders()
     });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
+    if (!res.ok) throw await res.json();
+    return res.json();
   },
 
-  async deleteSize(id) {
+  async getSizesByMaterial(id) {
     const res = await fetch(`${API_BASE}/catalog/sizes/${id}`, {
-      method: 'DELETE',
       headers: getAuthHeaders()
     });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
+    if (!res.ok) throw await res.json();
+    return res.json();
   },
 
-  async deleteFitting(id) {
+  async getFittingsByMaterial(id) {
     const res = await fetch(`${API_BASE}/catalog/fittings/${id}`, {
-      method: 'DELETE',
       headers: getAuthHeaders()
     });
-    
-    const result = await res.json();
-    if (!res.ok) throw result;
-    return result;
+    if (!res.ok) throw await res.json();
+    return res.json();
   },
 
-  // ============================================
-  // BILLS
-  // ============================================
+  // ---------- BILLS ----------
   async getNextInvoiceNo() {
     const res = await fetch(`${API_BASE}/bills/next-invoice`, {
       headers: getAuthHeaders()
@@ -214,24 +131,17 @@ const API = {
       headers: getAuthHeaders(),
       body: JSON.stringify(billData)
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw data;
     return data;
   },
 
   async getAllBills(page = 1, limit = 20) {
-    const res = await fetch(`${API_BASE}/bills?page=${page}&limit=${limit}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  async getBillById(id) {
-    const res = await fetch(`${API_BASE}/bills/${id}`, {
-      headers: getAuthHeaders()
-    });
+    const res = await fetch(
+      `${API_BASE}/bills?page=${page}&limit=${limit}`,
+      { headers: getAuthHeaders() }
+    );
     if (!res.ok) throw await res.json();
     return res.json();
   },
@@ -242,7 +152,7 @@ const API = {
       headers: getAuthHeaders(),
       body: JSON.stringify(billData)
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw data;
     return data;
@@ -253,232 +163,38 @@ const API = {
       method: "DELETE",
       headers: getAuthHeaders()
     });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw error;
-    }
-    
-    return await res.json();
+
+    const data = await res.json();
+    if (!res.ok) throw data;
+    return data;
   },
 
-  async getPriceHistory(productName) {
-    const encoded = encodeURIComponent(productName);
-    const res = await fetch(`${API_BASE}/bills/price-history/${encoded}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  // ============================================
-  // CUSTOMERS
-  // ============================================
+  // ---------- CUSTOMERS ----------
   async searchCustomers(query) {
-    const res = await fetch(`${API_BASE}/customers/search?q=${encodeURIComponent(query)}`, {
-      headers: getAuthHeaders()
-    });
+    const res = await fetch(
+      `${API_BASE}/customers/search?q=${encodeURIComponent(query)}`,
+      { headers: getAuthHeaders() }
+    );
     if (!res.ok) throw await res.json();
     return res.json();
   },
 
-  async addCustomer(customerData) {
+  async addCustomer(data) {
     const res = await fetch(`${API_BASE}/customers`, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(customerData)
+      body: JSON.stringify(data)
     });
-    
-    const data = await res.json();
-    if (!res.ok) throw data;
-    return data;
-  },
 
-  // ============================================
-  // DRAFTS
-  // ============================================
-  async saveDraft(draftData) {
-    if (draftData._id) {
-      const id = draftData._id;
-      delete draftData._id;
-      
-      const res = await fetch(`${API_BASE}/drafts/${id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(draftData)
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw data;
-      return data;
-    }
-    
-    const res = await fetch(`${API_BASE}/drafts`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(draftData)
-    });
-    
-    const data = await res.json();
-    if (!res.ok) throw data;
-    return data;
-  },
-
-  async getAllDrafts() {
-    const res = await fetch(`${API_BASE}/drafts`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  async getDraftById(draftId) {
-    const res = await fetch(`${API_BASE}/drafts/${draftId}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-
-  async deleteDraft(draftId) {
-    const res = await fetch(`${API_BASE}/drafts/${draftId}`, {
-      method: "DELETE",
-      headers: getAuthHeaders()
-    });
-    
-    const data = await res.json();
-    if (!res.ok) throw data;
-    return data;
-  },
-
-  // ============================================
-  // REPORTS API - OPTIMIZED ENDPOINTS
-  // ============================================
-  
-  /**
-   * Get aggregated report summary
-   * @param {string} dateFrom - Start date (YYYY-MM-DD)
-   * @param {string} dateTo - End date (YYYY-MM-DD)
-   * @returns {Promise} Summary data with totals
-   */
-  async getReportSummary(dateFrom, dateTo) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    
-    const res = await fetch(`${API_BASE}/reports/summary?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-  
-  /**
-   * Get revenue trend (daily aggregation)
-   * @param {string} dateFrom - Start date
-   * @param {string} dateTo - End date
-   * @returns {Promise} Array of {date, revenue, billCount}
-   */
-  async getRevenueTrend(dateFrom, dateTo) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    
-    const res = await fetch(`${API_BASE}/reports/revenue-trend?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-  
-  /**
-   * Get top customers (pre-aggregated)
-   * @param {string} dateFrom - Start date
-   * @param {string} dateTo - End date
-   * @param {number} limit - Max customers to return
-   * @returns {Promise} Array of customer stats
-   */
-  async getTopCustomers(dateFrom, dateTo, limit = 10) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    params.append('limit', limit);
-    
-    const res = await fetch(`${API_BASE}/reports/top-customers?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-  
-  /**
-   * Get top products (pre-aggregated)
-   * @param {string} dateFrom - Start date
-   * @param {string} dateTo - End date
-   * @param {number} limit - Max products to return
-   * @returns {Promise} Array of product stats
-   */
-  async getTopProducts(dateFrom, dateTo, limit = 10) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    params.append('limit', limit);
-    
-    const res = await fetch(`${API_BASE}/reports/top-products?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-  
-  /**
-   * Get payment status breakdown
-   * @param {string} dateFrom - Start date
-   * @param {string} dateTo - End date
-   * @returns {Promise} {fullyPaid, partiallyPaid, unpaid}
-   */
-  async getPaymentStatus(dateFrom, dateTo) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    
-    const res = await fetch(`${API_BASE}/reports/payment-status?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
-  },
-  
-  /**
-   * Get recent bills (lean and paginated)
-   * @param {string} dateFrom - Start date
-   * @param {string} dateTo - End date
-   * @param {number} page - Page number
-   * @param {number} limit - Bills per page
-   * @returns {Promise} Array of bills
-   */
-  async getRecentBills(dateFrom, dateTo, page = 1, limit = 20) {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append('dateFrom', dateFrom);
-    if (dateTo) params.append('dateTo', dateTo);
-    params.append('page', page);
-    params.append('limit', limit);
-    
-    const res = await fetch(`${API_BASE}/reports/recent-bills?${params}`, {
-      headers: getAuthHeaders()
-    });
-    
-    if (!res.ok) throw await res.json();
-    return res.json();
+    const result = await res.json();
+    if (!res.ok) throw result;
+    return result;
   }
 };
 
-// Export for module use
-if (typeof module !== 'undefined' && module.exports) {
+// ============================================
+// EXPORT
+// ============================================
+if (typeof module !== "undefined") {
   module.exports = API;
 }

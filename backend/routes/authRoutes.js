@@ -1,5 +1,5 @@
 // ============================================
-// authRoutes.js - Secure Authentication
+// authRoutes.js - Secure Authentication (Vercel Safe)
 // backend/routes/authRoutes.js
 // ============================================
 
@@ -9,85 +9,39 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
-// JWT Secret (move to .env in production!)
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
+// JWT Secret (MUST be set in Vercel env)
+const JWT_SECRET = process.env.JWT_SECRET || "change-this-secret";
 
 // ============================================
-// REGISTER ADMIN (Run this once to create admin)
+// REGISTER USER (Admin / Cashier / Viewer)
 // ============================================
 router.post("/register", async (req, res) => {
   try {
     const { username, password, role } = req.body;
 
-    // Check if user already exists
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: "Username already exists" });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
     const user = new User({
       username,
       password: hashedPassword,
-      role: role || "admin" // admin, cashier, viewer
+      role: role || "admin"
     });
 
     await user.save();
 
-    res.status(201).json({ 
-      message: "User registered successfully",
-      username: user.username,
-      role: user.role
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ============================================
-// LOGIN - Returns JWT Token
-// ============================================
-router.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    // Validate input
-    if (!username || !password) {
-      return res.status(400).json({ error: "Username and password required" });
-    }
-
-    // Find user
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        username: user.username,
-        role: user.role 
-      },
-      JWT_SECRET,
-      { expiresIn: "24h" } // Token expires in 24 hours
-    );
-
-    res.json({
+    res.status(201).json({
       success: true,
-      message: "Login successful",
-      token,
+      message: "User registered successfully",
       user: {
         username: user.username,
         role: user.role
@@ -100,14 +54,67 @@ router.post("/login", async (req, res) => {
 });
 
 // ============================================
-// VERIFY TOKEN - Check if user is logged in
+// LOGIN - SET JWT IN HTTPONLY COOKIE
+// ============================================
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    // ✅ STORE TOKEN IN COOKIE (Vercel Safe)
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // REQUIRED on Vercel
+      sameSite: "None",    // REQUIRED for cross-domain
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      user: {
+        username: user.username,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// VERIFY LOGIN (READ TOKEN FROM COOKIE)
 // ============================================
 router.get("/verify", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({ error: "No token provided" });
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -126,16 +133,16 @@ router.get("/verify", async (req, res) => {
     });
 
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 });
 
 // ============================================
-// CHANGE PASSWORD
+// CHANGE PASSWORD (AUTH REQUIRED)
 // ============================================
 router.post("/change-password", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.cookies.token;
     const { oldPassword, newPassword } = req.body;
 
     if (!token) {
@@ -149,13 +156,11 @@ router.post("/change-password", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Verify old password
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: "Old password is incorrect" });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
@@ -165,6 +170,19 @@ router.post("/change-password", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// ============================================
+// LOGOUT - CLEAR COOKIE
+// ============================================
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+  });
+
+  res.json({ success: true, message: "Logged out successfully" });
 });
 
 module.exports = router;

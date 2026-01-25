@@ -115,6 +115,9 @@ module.exports = async (req, res) => {
   }
 };
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 // For local development
 if (require.main === module) {
   connectDB();
