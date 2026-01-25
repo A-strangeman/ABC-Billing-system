@@ -19,7 +19,8 @@ app.use("/api/catalog", require("./routes/catalogRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/drafts", require("./routes/draftRoutes"));
-
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/reports", require("./routes/reportsRoutes"));
 app.get("/", (req, res) => {
   res.json({
     message: "ABC Company Billing API",

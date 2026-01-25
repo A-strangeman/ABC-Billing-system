@@ -142,9 +142,40 @@ FittingSchema.index({ materialId: 1, active: 1 });
 
 // Draft Indexes
 DraftSchema.index({ createdAt: -1 });
+// ============================================
+// ADD THIS TO models/index.js
+// (Add after DraftSchema, before exports)
+// ============================================
+
+// USER SCHEMA - For Authentication
+const UserSchema = new mongoose.Schema({
+  username: { 
+    type: String, 
+    required: true, 
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  password: { 
+    type: String, 
+    required: true 
+  },
+  role: { 
+    type: String, 
+    enum: ['admin', 'cashier', 'viewer'],
+    default: 'admin'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Add index for username
+UserSchema.index({ username: 1 });
 
 // ============================================
-// EXPORTS WITH OVERWRITE PROTECTION
+// UPDATE EXPORTS SECTION
 // ============================================
 module.exports = {
   Category: mongoose.models.Category || mongoose.model("Category", CategorySchema),
@@ -153,5 +184,6 @@ module.exports = {
   Fitting: mongoose.models.Fitting || mongoose.model("Fitting", FittingSchema),
   Customer: mongoose.models.Customer || mongoose.model("Customer", CustomerSchema),
   Bill: mongoose.models.Bill || mongoose.model("Bill", BillSchema),
-  Draft: mongoose.models.Draft || mongoose.model("Draft", DraftSchema)
+  Draft: mongoose.models.Draft || mongoose.model("Draft", DraftSchema),
+  User: mongoose.models.User || mongoose.model("User", UserSchema) // ADD THIS LINE
 };
