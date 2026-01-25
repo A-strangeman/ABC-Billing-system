@@ -9,7 +9,7 @@ connectDB();
 
 const app = express();
 
-// SPEED OPTIMIZATION
+// MIDDLEWARE
 app.use(compression());
 app.use(cors());
 app.use(express.json());
@@ -21,6 +21,7 @@ app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/drafts", require("./routes/draftRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/reports", require("./routes/reportsRoutes"));
+
 app.get("/", (req, res) => {
   res.json({
     message: "ABC Company Billing API",
@@ -33,8 +34,4 @@ app.get("/", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+module.exports = app; // ✅ THIS IS THE KEY
