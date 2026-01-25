@@ -1,18 +1,20 @@
-// ============================================
-// auth-guard.js - Authentication Guard
-// frontend/js/auth-guard.js
-// ============================================
+// public/js/auth-guard.js - FIXED FOR VERCEL
 
 (async function checkAuth() {
-  const API_BASE = "http://localhost:5000/api";
+  // Determine API base URL dynamically
+  const API_BASE = window.location.hostname.includes('vercel.app')
+    ? window.location.origin + '/api'
+    : 'http://localhost:5000/api';
+  
   const token = localStorage.getItem('authToken');
   
   console.log("🔐 Checking authentication...");
+  console.log("📍 API Base:", API_BASE);
   
-  // If no token and not on login page, redirect to login
   const currentPage = window.location.pathname;
   const isLoginPage = currentPage.includes('index.html') || currentPage === '/';
   
+  // If no token and not on login page, redirect
   if (!token && !isLoginPage) {
     console.log("❌ No token found, redirecting to login");
     window.location.href = '../index.html';
@@ -29,15 +31,23 @@
   // If we have a token, verify it
   if (token) {
     try {
+      console.log("🔍 Verifying token...");
+      
       const response = await fetch(`${API_BASE}/auth/verify`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
+      console.log("📡 Verify response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error('Invalid token');
+        throw new Error('Token verification failed');
       }
       
       const data = await response.json();
+      console.log("✅ Token verified:", data);
       
       // Store user info globally
       window.currentUser = {
@@ -57,11 +67,14 @@
       
       // Redirect to login if not already there
       if (!isLoginPage) {
+        console.log("🔄 Redirecting to login...");
         window.location.href = '../index.html';
       }
     }
   }
 })();
+
+// Rest of auth-guard.js...
 
 // ============================================
 // GLOBAL LOGOUT FUNCTION

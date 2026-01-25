@@ -1,5 +1,2 @@
-// api/index.js
-// This pulls the application from your backend folder
-const app = require('../backend/server.js');
-
-module.exports = app;
+// api/index.js - SIMPLIFIED
+module.exports = require('../backend/server.js');

@@ -3,9 +3,23 @@
 // ============================================
 
 // Automatically use the right URL based on where the site is running
-const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? "http://localhost:5000/api"
-  : "/api";
+const API_BASE = (() => {
+  // Check if running on Vercel
+  if (window.location.hostname.includes('vercel.app')) {
+    return window.location.origin + '/api';
+  }
+  
+  // Local development
+  if (window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000/api';
+  }
+  
+  // Fallback to relative URL
+  return '/api';
+})();
+
+console.log('🔗 API Base URL:', API_BASE);
 
 // Helper function to get auth headers
 function getAuthHeaders() {
