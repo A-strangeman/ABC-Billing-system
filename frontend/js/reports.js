@@ -1,20 +1,31 @@
 // ============================================
-// REPORTS.JS - Analytics & Charts (FIXED)
+// REPORTS.JS - COMPLETE OPTIMIZED VERSION
+// Uses server-side aggregation + keeps all export functions
 // ============================================
 
-let allBills = [];
-let filteredBills = [];
 let revenueChart, customerChart, paymentChart;
-
-// Date range
 let dateFrom = null;
 let dateTo = null;
+
+// Cache for chart instances to avoid recreation
+const chartCache = {
+  revenue: null,
+  customer: null,
+  payment: null
+};
+
+// Cache for export data
+let exportData = {
+  bills: [],
+  customers: [],
+  summary: null
+};
 
 // ============================================
 // INIT
 // ============================================
 async function init() {
-  console.log("📊 Initializing reports...");
+  console.log("📊 Initializing optimized reports...");
   
   // Set default date range (this month)
   const today = new Date();
@@ -23,182 +34,123 @@ async function init() {
   document.getElementById('dateFrom').value = firstDay.toISOString().split('T')[0];
   document.getElementById('dateTo').value = today.toISOString().split('T')[0];
   
-  // Load data
-  await loadReportsData();
-  
   // Setup event listeners
   setupEventListeners();
+  
+  // Load data
+  await loadReportsData();
 }
 
 // ============================================
-// LOAD DATA
+// LOAD DATA - OPTIMIZED with Parallel Requests
 // ============================================
 async function loadReportsData() {
   try {
-    console.log("🔄 Loading reports data...");
+    showLoadingState();
     
-    // Fetch all bills
-    const response = await API.getAllBills(1, 1000); // Get more bills for reports
+    dateFrom = document.getElementById('dateFrom').value;
+    dateTo = document.getElementById('dateTo').value;
     
-    console.log("✅ API Response:", response);
+    console.log(`📅 Loading reports: ${dateFrom} to ${dateTo}`);
     
-    // Handle different response formats
-    if (Array.isArray(response)) {
-      allBills = response;
-    } else if (response.bills && Array.isArray(response.bills)) {
-      allBills = response.bills;
-    } else if (response.data && Array.isArray(response.data)) {
-      allBills = response.data;
-    } else {
-      console.error("❌ Unexpected response format:", response);
-      allBills = [];
-    }
+    // Parallel API calls for maximum speed
+    const [
+      summary,
+      revenueTrend,
+      topCustomers,
+      topProducts,
+      paymentStatus,
+      recentBills
+    ] = await Promise.all([
+      API.getReportSummary(dateFrom, dateTo),
+      API.getRevenueTrend(dateFrom, dateTo),
+      API.getTopCustomers(dateFrom, dateTo, 10), // Get more for export
+      API.getTopProducts(dateFrom, dateTo, 10),
+      API.getPaymentStatus(dateFrom, dateTo),
+      API.getRecentBills(dateFrom, dateTo, 1, 100) // Get more for export
+    ]);
     
-    console.log(`📦 Loaded ${allBills.length} bills`);
-    console.log("Sample bill:", allBills[0]);
+    // Store for export
+    exportData = {
+      bills: recentBills,
+      customers: topCustomers,
+      summary: summary
+    };
     
-    if (allBills.length === 0) {
-      alert("No bills found in database. Please create some bills first.");
-    }
+    // Update all sections
+    updateMetrics(summary);
+    updateRevenueChart(revenueTrend);
+    updateCustomerChart(topCustomers.slice(0, 5)); // Show top 5 in chart
+    updateProductsList(topProducts);
+    updatePaymentChart(paymentStatus);
+    updateBillsTable(recentBills.slice(0, 20)); // Show 20 in table
+    updateCustomersTable(topCustomers);
     
-    // Apply date filter
-    applyDateFilter();
+    console.log("✅ Reports loaded successfully");
     
   } catch (error) {
-    console.error('❌ Error loading reports data:', error);
-    alert('Error loading reports data: ' + error.message);
+    console.error('❌ Error loading reports:', error);
+    showNotification('Error loading reports: ' + error.message, 'error');
+  } finally {
+    hideLoadingState();
   }
-}
-
-// ============================================
-// APPLY DATE FILTER
-// ============================================
-function applyDateFilter() {
-  dateFrom = document.getElementById('dateFrom').value;
-  dateTo = document.getElementById('dateTo').value;
-  
-  console.log(`📅 Filtering from ${dateFrom} to ${dateTo}`);
-  
-  if (!dateFrom || !dateTo) {
-    filteredBills = allBills;
-  } else {
-    filteredBills = allBills.filter(bill => {
-      const billDate = new Date(bill.date);
-      const from = new Date(dateFrom);
-      const to = new Date(dateTo);
-      to.setHours(23, 59, 59, 999); // Include entire end date
-      
-      return billDate >= from && billDate <= to;
-    });
-  }
-  
-  console.log(`✅ Filtered to ${filteredBills.length} bills`);
-  
-  // Update all reports
-  updateMetrics();
-  updateCharts();
-  updateTables();
 }
 
 // ============================================
 // UPDATE METRICS
 // ============================================
-
-
-function updateMetrics() {
-  // Total Revenue
-  const totalRevenue = filteredBills.reduce((sum, bill) => 
-    sum + (bill.total || 0), 0  // ✅ Changed from grandTotal
-  );
+function updateMetrics(summary) {
   document.getElementById('totalRevenue').textContent = 
-    `₹${totalRevenue.toFixed(2)}`;
+    `₹${(summary.totalRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
-  // Total Bills
-  document.getElementById('totalBills').textContent = filteredBills.length;
+  document.getElementById('totalBills').textContent = summary.totalBills || 0;
   
-  // Unique Customers
-  const uniqueCustomers = new Set(
-    filteredBills.map(b => b.customer?.name).filter(Boolean)
-  ).size;
-  document.getElementById('uniqueCustomers').textContent = uniqueCustomers;
+  document.getElementById('uniqueCustomers').textContent = summary.uniqueCustomers || 0;
   
-  // Average Bill
-  const avgBill = filteredBills.length > 0 
-    ? totalRevenue / filteredBills.length 
-    : 0;
-  document.getElementById('avgBill').textContent = `₹${avgBill.toFixed(2)}`;
+  document.getElementById('avgBill').textContent = 
+    `₹${(summary.avgBill || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
-  // Total Discount
-  const totalDiscount = filteredBills.reduce((sum, bill) => 
-    sum + (bill.discount || 0), 0
-  );
   document.getElementById('totalDiscount').textContent = 
-    `₹${totalDiscount.toFixed(2)}`;
+    `₹${(summary.totalDiscount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
-  const discountPercent = totalRevenue > 0 
-    ? (totalDiscount / (totalRevenue + totalDiscount)) * 100 
+  const discountPercent = summary.totalRevenue > 0 
+    ? (summary.totalDiscount / (summary.totalRevenue + summary.totalDiscount)) * 100 
     : 0;
-  document.getElementById('discountPercent').textContent = 
-    `${discountPercent.toFixed(1)}%`;
+  document.getElementById('discountPercent').textContent = `${discountPercent.toFixed(1)}%`;
   
-  // Pending Balance
-  const pendingBalance = filteredBills.reduce((sum, bill) => 
-    sum + (bill.balance || 0), 0
-  );
   document.getElementById('pendingBalance').textContent = 
-    `₹${pendingBalance.toFixed(2)}`;
+    `₹${(summary.totalBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   
-  const balancePercent = totalRevenue > 0 
-    ? (pendingBalance / totalRevenue) * 100 
+  const balancePercent = summary.totalRevenue > 0 
+    ? (summary.totalBalance / summary.totalRevenue) * 100 
     : 0;
-  document.getElementById('balancePercent').textContent = 
-    `${balancePercent.toFixed(1)}%`;
+  document.getElementById('balancePercent').textContent = `${balancePercent.toFixed(1)}%`;
 }
 
 // ============================================
-// UPDATE CHARTS
+// UPDATE REVENUE CHART - Optimized Update
 // ============================================
-function updateCharts() {
-  console.log("📊 Updating charts...");
-  updateRevenueChart();
-  updateCustomerChart();
-  updateProductsList();
-  updatePaymentChart();
-}
-
-// Revenue Trend Chart
-// REPLACE updateRevenueChart() function (around line 115)
-
-function updateRevenueChart() {
+function updateRevenueChart(trendData) {
   const ctx = document.getElementById('revenueChart').getContext('2d');
   
-  // Group by date
-  const revenueByDate = {};
-  filteredBills.forEach(bill => {
-    const date = bill.date;
-    if (!revenueByDate[date]) {
-      revenueByDate[date] = 0;
-    }
-    revenueByDate[date] += bill.total || 0;  // ✅ Changed from grandTotal
-  });
+  const labels = trendData.map(d => 
+    new Date(d.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+  );
+  const revenues = trendData.map(d => d.revenue);
   
-  // Sort by date
-  const sortedDates = Object.keys(revenueByDate).sort();
-  const revenues = sortedDates.map(date => revenueByDate[date]);
-  
-  // Destroy previous chart
-  if (revenueChart) {
-    revenueChart.destroy();
+  // Update existing chart instead of destroying
+  if (chartCache.revenue) {
+    chartCache.revenue.data.labels = labels;
+    chartCache.revenue.data.datasets[0].data = revenues;
+    chartCache.revenue.update('none'); // Skip animation for speed
+    return;
   }
   
-  // Create chart
-  revenueChart = new Chart(ctx, {
+  // Create new chart only if doesn't exist
+  chartCache.revenue = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: sortedDates.map(d => new Date(d).toLocaleDateString('en-IN', { 
-        month: 'short', 
-        day: 'numeric' 
-      })),
+      labels: labels,
       datasets: [{
         label: 'Revenue (₹)',
         data: revenues,
@@ -211,10 +163,11 @@ function updateRevenueChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      animation: {
+        duration: 0 // Disable animation for speed
+      },
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
@@ -229,37 +182,26 @@ function updateRevenueChart() {
     }
   });
 }
-// Top Customers Chart
-// REPLACE updateCustomerChart() function (around line 169)
 
-function updateCustomerChart() {
+// ============================================
+// UPDATE CUSTOMER CHART - Optimized Update
+// ============================================
+function updateCustomerChart(customersData) {
   const ctx = document.getElementById('customerChart').getContext('2d');
   
-  // Group by customer
-  const revenueByCustomer = {};
-  filteredBills.forEach(bill => {
-    const customer = bill.customer?.name || 'Unknown';
-    if (!revenueByCustomer[customer]) {
-      revenueByCustomer[customer] = 0;
-    }
-    revenueByCustomer[customer] += bill.total || 0;  // ✅ Changed from grandTotal
-  });
+  const customerNames = customersData.map(c => c.customerName);
+  const customerRevenues = customersData.map(c => c.totalRevenue);
   
-  // Sort and get top 5
-  const sortedCustomers = Object.entries(revenueByCustomer)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  
-  const customerNames = sortedCustomers.map(c => c[0]);
-  const customerRevenues = sortedCustomers.map(c => c[1]);
-  
-  // Destroy previous chart
-  if (customerChart) {
-    customerChart.destroy();
+  // Update existing chart
+  if (chartCache.customer) {
+    chartCache.customer.data.labels = customerNames;
+    chartCache.customer.data.datasets[0].data = customerRevenues;
+    chartCache.customer.update('none');
+    return;
   }
   
-  // Create chart
-  customerChart = new Chart(ctx, {
+  // Create new chart
+  chartCache.customer = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: customerNames,
@@ -277,101 +219,74 @@ function updateCustomerChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      animation: {
+        duration: 0
+      },
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
   });
 }
 
-// Top Products List
-// REPLACE updateProductsList() function (around line 218)
-
-function updateProductsList() {
+// ============================================
+// UPDATE PRODUCTS LIST
+// ============================================
+function updateProductsList(productsData) {
   const container = document.getElementById('productsList');
   
-  // Aggregate products
-  const productData = {};
-  filteredBills.forEach(bill => {
-    if (bill.items) {
-      bill.items.forEach(item => {
-        const name = item.productName || 'Unknown';  // ✅ Changed from item.product
-        if (!productData[name]) {
-          productData[name] = { qty: 0, amount: 0 };
-        }
-        productData[name].qty += item.qty || 0;
-        productData[name].amount += item.amount || 0;
-      });
-    }
-  });
-  
-  // Sort by amount
-  const sortedProducts = Object.entries(productData)
-    .sort((a, b) => b[1].amount - a[1].amount)
-    .slice(0, 10);
-  
-  if (sortedProducts.length === 0) {
+  if (productsData.length === 0) {
     container.innerHTML = '<p class="loading">No products found</p>';
     return;
   }
   
-  container.innerHTML = sortedProducts.map(([name, data]) => `
+  container.innerHTML = productsData.map(product => `
     <div class="product-item">
-      <span class="product-name">${name}</span>
-      <span class="product-quantity">${data.qty} units</span>
-      <span class="product-amount">₹${data.amount.toFixed(2)}</span>
+      <span class="product-name">${product.productName}</span>
+      <span class="product-quantity">${product.totalQuantity.toFixed(2)} units</span>
+      <span class="product-amount">₹${product.totalAmount.toFixed(2)}</span>
     </div>
   `).join('');
 }
 
-// Payment Status Chart
-// REPLACE updatePaymentChart() function (around line 256)
-
-function updatePaymentChart() {
+// ============================================
+// UPDATE PAYMENT CHART - Optimized Update
+// ============================================
+function updatePaymentChart(statusData) {
   const ctx = document.getElementById('paymentChart').getContext('2d');
   
-  let fullyPaid = 0;
-  let partiallyPaid = 0;
-  let unpaid = 0;
+  const data = [
+    statusData.fullyPaid || 0,
+    statusData.partiallyPaid || 0,
+    statusData.unpaid || 0
+  ];
   
-  filteredBills.forEach(bill => {
-    const balance = bill.balance || 0;
-    const total = bill.total || 0;  // ✅ Changed from grandTotal
-    
-    if (balance === 0) {
-      fullyPaid += total;
-    } else if (balance < total) {
-      partiallyPaid += total;
-    } else {
-      unpaid += total;
-    }
-  });
-  
-  // Destroy previous chart
-  if (paymentChart) {
-    paymentChart.destroy();
+  // Update existing chart
+  if (chartCache.payment) {
+    chartCache.payment.data.datasets[0].data = data;
+    chartCache.payment.update('none');
+    return;
   }
   
-  // Create chart
-  paymentChart = new Chart(ctx, {
+  // Create new chart
+  chartCache.payment = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['Fully Paid', 'Partially Paid', 'Unpaid'],
       datasets: [{
         label: 'Amount (₹)',
-        data: [fullyPaid, partiallyPaid, unpaid],
+        data: data,
         backgroundColor: ['#4caf50', '#ffa500', '#f44336']
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      animation: {
+        duration: 0
+      },
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
@@ -390,27 +305,20 @@ function updatePaymentChart() {
 // ============================================
 // UPDATE TABLES
 // ============================================
-function updateTables() {
-  updateBillsTable();
-  updateCustomersTable();
-}
-
-// REPLACE updateBillsTable() function (around line 313)
-
-function updateBillsTable() {
+function updateBillsTable(bills) {
   const tbody = document.getElementById('billsTableBody');
   
-  if (filteredBills.length === 0) {
+  if (bills.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" class="loading">No bills found</td></tr>';
     return;
   }
   
-  tbody.innerHTML = filteredBills.slice(0, 20).map(bill => `
+  tbody.innerHTML = bills.map(bill => `
     <tr>
       <td>${bill.estimateNo}</td>
       <td>${new Date(bill.date).toLocaleDateString()}</td>
       <td>${bill.customer?.name || '-'}</td>
-      <td>${bill.items?.length || 0}</td>
+      <td>${bill.itemCount || 0}</td>
       <td>₹${(bill.subTotal || 0).toFixed(2)}</td>
       <td>₹${(bill.discount || 0).toFixed(2)}</td>
       <td>₹${(bill.total || 0).toFixed(2)}</td>
@@ -421,63 +329,48 @@ function updateBillsTable() {
   `).join('');
 }
 
-// REPLACE updateCustomersTable() function (around line 344)
-
-function updateCustomersTable() {
+function updateCustomersTable(customers) {
   const tbody = document.getElementById('customersTableBody');
   
-  // Aggregate by customer
-  const customerStats = {};
-  filteredBills.forEach(bill => {
-    const name = bill.customer?.name || 'Unknown';
-    
-    if (!customerStats[name]) {
-      customerStats[name] = {
-        count: 0,
-        total: 0,
-        pending: 0
-      };
-    }
-    
-    customerStats[name].count++;
-    customerStats[name].total += bill.total || 0;  // ✅ Changed from grandTotal
-    customerStats[name].pending += bill.balance || 0;
-  });
-  
-  // Sort by total
-  const sortedCustomers = Object.entries(customerStats)
-    .sort((a, b) => b[1].total - a[1].total);
-  
-  if (sortedCustomers.length === 0) {
+  if (customers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="loading">No customers found</td></tr>';
     return;
   }
   
-  tbody.innerHTML = sortedCustomers.map(([name, stats]) => {
-    const avg = stats.total / stats.count;
-    
-    return `
-      <tr>
-        <td>${name}</td>
-        <td>${stats.count}</td>
-        <td>₹${stats.total.toFixed(2)}</td>
-        <td>₹${avg.toFixed(2)}</td>
-        <td class="${stats.pending > 0 ? 'negative' : 'positive'}">
-          ₹${stats.pending.toFixed(2)}
-        </td>
-      </tr>
-    `;
-  }).join('');
+  tbody.innerHTML = customers.map(customer => `
+    <tr>
+      <td>${customer.customerName}</td>
+      <td>${customer.billCount}</td>
+      <td>₹${customer.totalRevenue.toFixed(2)}</td>
+      <td>₹${customer.avgBill.toFixed(2)}</td>
+      <td class="${customer.pendingBalance > 0 ? 'negative' : 'positive'}">
+        ₹${customer.pendingBalance.toFixed(2)}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ============================================
+// LOADING STATES
+// ============================================
+function showLoadingState() {
+  document.querySelectorAll('.metric-value').forEach(el => {
+    el.style.opacity = '0.5';
+  });
+}
+
+function hideLoadingState() {
+  document.querySelectorAll('.metric-value').forEach(el => {
+    el.style.opacity = '1';
+  });
 }
 
 // ============================================
 // SETUP EVENT LISTENERS
 // ============================================
 function setupEventListeners() {
-  // Apply filter
-  document.getElementById('applyFilter')?.addEventListener('click', applyDateFilter);
+  document.getElementById('applyFilter')?.addEventListener('click', loadReportsData);
   
-  // Reset filter
   document.getElementById('resetFilter')?.addEventListener('click', () => {
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -485,7 +378,7 @@ function setupEventListeners() {
     document.getElementById('dateFrom').value = firstDay.toISOString().split('T')[0];
     document.getElementById('dateTo').value = today.toISOString().split('T')[0];
     
-    applyDateFilter();
+    loadReportsData();
   });
   
   // Quick filters
@@ -517,7 +410,7 @@ function setupEventListeners() {
       document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
-      applyDateFilter();
+      loadReportsData();
     });
   });
   
@@ -528,35 +421,122 @@ function setupEventListeners() {
 }
 
 // ============================================
-// EXPORT FUNCTIONS
+// EXPORT TO CSV - COMPLETE IMPLEMENTATION
 // ============================================
-// REPLACE exportToCSV() function (around line 444)
-
 function exportToCSV() {
-  let csv = 'Bill #,Date,Customer,Items,Amount,Discount,Total,Balance\n';
-  
-  filteredBills.forEach(bill => {
-    csv += `${bill.estimateNo},`;
-    csv += `${bill.date},`;
-    csv += `${bill.customer?.name || '-'},`;
-    csv += `${bill.items?.length || 0},`;
-    csv += `${(bill.subTotal || 0).toFixed(2)},`;
-    csv += `${(bill.discount || 0).toFixed(2)},`;
-    csv += `${(bill.total || 0).toFixed(2)},`;
-    csv += `${(bill.balance || 0).toFixed(2)}\n`;
-  });
-  
-  downloadFile(csv, 'reports.csv', 'text/csv');
-}
-function exportToExcel() {
-  alert('Excel export requires additional library. CSV export is available.');
-  exportToCSV();
+  try {
+    let csv = 'Bill #,Date,Customer,Items,Sub Total,Discount,Total,Balance\n';
+    
+    exportData.bills.forEach(bill => {
+      csv += `${bill.estimateNo},`;
+      csv += `${bill.date},`;
+      csv += `"${(bill.customer?.name || '-').replace(/"/g, '""')}",`;
+      csv += `${bill.itemCount || 0},`;
+      csv += `${(bill.subTotal || 0).toFixed(2)},`;
+      csv += `${(bill.discount || 0).toFixed(2)},`;
+      csv += `${(bill.total || 0).toFixed(2)},`;
+      csv += `${(bill.balance || 0).toFixed(2)}\n`;
+    });
+    
+    // Add summary
+    csv += '\n\nSUMMARY\n';
+    csv += `Total Bills,${exportData.summary?.totalBills || 0}\n`;
+    csv += `Total Revenue,${(exportData.summary?.totalRevenue || 0).toFixed(2)}\n`;
+    csv += `Total Discount,${(exportData.summary?.totalDiscount || 0).toFixed(2)}\n`;
+    csv += `Pending Balance,${(exportData.summary?.totalBalance || 0).toFixed(2)}\n`;
+    
+    downloadFile(csv, `ABC-Company-Report-${dateFrom}-to-${dateTo}.csv`, 'text/csv');
+    showNotification('✅ CSV file downloaded successfully!', 'success');
+    
+  } catch (error) {
+    console.error('CSV export error:', error);
+    showNotification('Error exporting CSV: ' + error.message, 'error');
+  }
 }
 
+// ============================================
+// EXPORT TO EXCEL - COMPLETE IMPLEMENTATION
+// ============================================
+function exportToExcel() {
+  try {
+    // Create HTML table for Excel
+    let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+    html += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+    html += '<x:Name>Report</x:Name>';
+    html += '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>';
+    html += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+    html += '<meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>';
+    html += '</head><body>';
+    
+    // Header
+    html += '<table border="1">';
+    html += '<tr><th colspan="8" style="background-color:#ff6363;color:white;font-size:16px;font-weight:bold;">ABC Company - Business Report</th></tr>';
+    html += `<tr><th colspan="8" style="background-color:#f0f0f0;">Period: ${dateFrom} to ${dateTo}</th></tr>`;
+    html += '<tr><th></th></tr>'; // Empty row
+    
+    // Column headers
+    html += '<tr style="background-color:#ff6363;color:white;font-weight:bold;">';
+    html += '<th>Bill #</th><th>Date</th><th>Customer</th><th>Items</th>';
+    html += '<th>Sub Total</th><th>Discount</th><th>Total</th><th>Balance</th>';
+    html += '</tr>';
+    
+    // Data rows
+    exportData.bills.forEach(bill => {
+      html += '<tr>';
+      html += `<td>${bill.estimateNo}</td>`;
+      html += `<td>${bill.date}</td>`;
+      html += `<td>${(bill.customer?.name || '-').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
+      html += `<td>${bill.itemCount || 0}</td>`;
+      html += `<td>₹${(bill.subTotal || 0).toFixed(2)}</td>`;
+      html += `<td>₹${(bill.discount || 0).toFixed(2)}</td>`;
+      html += `<td>₹${(bill.total || 0).toFixed(2)}</td>`;
+      html += `<td>₹${(bill.balance || 0).toFixed(2)}</td>`;
+      html += '</tr>';
+    });
+    
+    // Summary section
+    const summary = exportData.summary || {};
+    html += '<tr><td colspan="8"></td></tr>'; // Empty row
+    html += '<tr style="background-color:#f0f0f0;font-weight:bold;">';
+    html += '<td colspan="2">SUMMARY</td><td colspan="6"></td></tr>';
+    html += `<tr><td colspan="2">Total Bills:</td><td>${summary.totalBills || 0}</td><td colspan="5"></td></tr>`;
+    html += `<tr><td colspan="2">Total Revenue:</td><td>₹${(summary.totalRevenue || 0).toFixed(2)}</td><td colspan="5"></td></tr>`;
+    html += `<tr><td colspan="2">Total Discount:</td><td>₹${(summary.totalDiscount || 0).toFixed(2)}</td><td colspan="5"></td></tr>`;
+    html += `<tr><td colspan="2">Pending Balance:</td><td>₹${(summary.totalBalance || 0).toFixed(2)}</td><td colspan="5"></td></tr>`;
+    html += `<tr><td colspan="2">Average Bill:</td><td>₹${(summary.avgBill || 0).toFixed(2)}</td><td colspan="5"></td></tr>`;
+    html += `<tr><td colspan="2">Unique Customers:</td><td>${summary.uniqueCustomers || 0}</td><td colspan="5"></td></tr>`;
+    
+    html += '</table></body></html>';
+    
+    // Create blob and download
+    const blob = new Blob([html], { 
+      type: 'application/vnd.ms-excel' 
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ABC-Company-Report-${dateFrom}-to-${dateTo}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showNotification('✅ Excel file downloaded successfully!', 'success');
+    
+  } catch (error) {
+    console.error('Excel export error:', error);
+    showNotification('Error exporting Excel: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// EXPORT TO PDF - Print functionality
+// ============================================
 function exportToPDF() {
   window.print();
 }
 
+// ============================================
+// DOWNLOAD FILE HELPER
+// ============================================
 function downloadFile(content, filename, contentType) {
   const blob = new Blob([content], { type: contentType });
   const url = URL.createObjectURL(blob);
@@ -566,6 +546,61 @@ function downloadFile(content, filename, contentType) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ============================================
+// NOTIFICATION HELPER
+// ============================================
+function showNotification(message, type = 'info') {
+  let notification = document.getElementById('notification');
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(notification);
+  }
+  
+  const colors = {
+    success: '#4caf50',
+    error: '#f44336',
+    warning: '#ffc107',
+    info: '#2196f3'
+  };
+  
+  notification.style.background = colors[type] || colors.info;
+  notification.textContent = message;
+  notification.style.display = 'block';
+  
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 4000);
+}
+
+// Add CSS animation for notification
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+document.head.appendChild(style);
 
 // ============================================
 // START

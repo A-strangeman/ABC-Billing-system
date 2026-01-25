@@ -652,111 +652,330 @@ async function saveFinalBill() {
     alert("Error: " + (error.error || error.message || "Failed to save bill"));
   }
 }
+// ============================================
+// REPLACE downloadPDF() in billing.js
+// Optimized version using YOUR exact PDF code
+// ============================================
 
-// ============================================
-// DOWNLOAD PDF - Customer sees adjusted prices
-// ============================================
+/**
+ * Download PDF - OPTIMIZED (Non-blocking)
+ * Uses your existing PDF generation logic
+ */
 async function downloadPDF() {
   const billData = getBillData();
   
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "pt", "a4");
+  // Create progress modal
+  const modal = createProgressModal();
+  document.body.appendChild(modal);
   
-  doc.setFontSize(16);
-  doc.text("Estimated Bill", 297.5, 30, { align: "center" });
-  
-  doc.setFontSize(18).setFont(undefined, "bold");
-  doc.text("ABC Company", 40, 60);
-  doc.setFontSize(10).setFont(undefined, "normal");
-  doc.text("Phone: 9825333385", 40, 75);
-  
-  const leftX = 40, rightX = 340, boxY = 95, boxH = 60, boxW = 515;
-  doc.rect(leftX, boxY, boxW, boxH);
-  doc.line(rightX, boxY, rightX, boxY + boxH);
-  
-  doc.setFontSize(11);
-  doc.text("Bill To:", leftX + 8, boxY + 18);
-  doc.setFontSize(10);
-  doc.text(billData.customer.name || "-", leftX + 8, boxY + 34);
-  if (billData.customer.phone) {
-    doc.text(billData.customer.phone, leftX + 8, boxY + 50);
-  }
-  
-  doc.setFontSize(11);
-  doc.text("Estimate Details:", rightX + 8, boxY + 18);
-  doc.setFontSize(10);
-  doc.text(`No: ${billData.estimateNo}`, rightX + 8, boxY + 34);
-  doc.text(`Date: ${billData.date}`, rightX + 8, boxY + 50);
-  
-  // PDF table - show adjusted price as base price (customer view)
-  const tableData = billData.items.map((item, idx) => {
-    // Calculate adjusted price per unit (original price + percentage)
-    const adjustedPricePerUnit = item.qty > 0 ? (item.amount / item.qty) : item.price;
+  try {
+    // Step 1: Initialize
+    updateProgressModal(modal, 10, 'Initializing PDF...');
+    await delay(10);
     
-    return [
-      (idx + 1).toString(),
-      item.productName,
-      item.qty.toString(),
-      item.unit,
-      `Rs. ${adjustedPricePerUnit.toFixed(2)}`,
-      `Rs. ${item.amount.toFixed(2)}`
-    ];
-  });
-  
-  doc.autoTable({
-    head: [["#", "Item name", "Quantity", "Unit", "Price/Unit(Rs)", "Amount(Rs)"]],
-    body: tableData,
-    startY: boxY + boxH + 20,
-    theme: "grid",
-    styles: { fontSize: 9, cellPadding: 4 },
-    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-    columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 220 },
-      2: { cellWidth: 65, halign: "right" },
-      3: { cellWidth: 50 },
-      4: { cellWidth: 95, halign: "right" },
-      5: { cellWidth: 95, halign: "right" }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "pt", "a4");
+    
+    // Step 2: Header
+    updateProgressModal(modal, 20, 'Adding header...');
+    await delay(10);
+    
+    doc.setFontSize(16);
+    doc.text("Estimated Bill", 297.5, 30, { align: "center" });
+    
+    doc.setFontSize(18).setFont(undefined, "bold");
+    doc.text("ABC Company", 40, 60);
+    doc.setFontSize(10).setFont(undefined, "normal");
+    doc.text("Phone: 9825333385", 40, 75);
+    
+    // Step 3: Customer box
+    updateProgressModal(modal, 30, 'Adding customer details...');
+    await delay(10);
+    
+    const leftX = 40, rightX = 340, boxY = 95, boxH = 60, boxW = 515;
+    doc.rect(leftX, boxY, boxW, boxH);
+    doc.line(rightX, boxY, rightX, boxY + boxH);
+    
+    doc.setFontSize(11);
+    doc.text("Bill To:", leftX + 8, boxY + 18);
+    doc.setFontSize(10);
+    doc.text(billData.customer.name || "-", leftX + 8, boxY + 34);
+    if (billData.customer.phone) {
+      doc.text(billData.customer.phone, leftX + 8, boxY + 50);
     }
-  });
-  
-  let y = doc.lastAutoTable.finalY + 8;
-  
-  doc.setFont(undefined, "bold");
-  doc.text(`Total`, 40, y + 15);
-  doc.text(`Rs. ${billData.total.toFixed(2)}`, 500, y + 15, { align: "right" });
-  
-  y += 40;
-  doc.setFont(undefined, "normal");
-  doc.text(`Sub Total :`, 400, y);
-  doc.text(`Rs. ${billData.subTotal.toFixed(2)}`, 575, y, { align: "right" });
-  
-  y += 15;
-  doc.text(`Discount :`, 400, y);
-  doc.text(`Rs. ${billData.discount.toFixed(2)}`, 575, y, { align: "right" });
-  
-  y += 15;
-  doc.setFont(undefined, "bold");
-  doc.text(`Total :`, 400, y);
-  doc.text(`Rs. ${billData.total.toFixed(2)}`, 575, y, { align: "right" });
-  
-  y += 30;
-  doc.setFont(undefined, "normal");
-  doc.text("Invoice Amount in Words:", 40, y);
-  doc.text(amountWordsEl.value, 40, y + 15);
-  
-  y += 40;
-  doc.text("Received :", 400, y);
-  doc.text(`Rs. ${billData.received.toFixed(2)}`, 575, y, { align: "right" });
-  
-  y += 15;
-  doc.text("Balance :", 400, y);
-  doc.text(`Rs. ${billData.balance.toFixed(2)}`, 575, y, { align: "right" });
-  
-  const filename = `${billData.estimateNo} - ${billData.customer.name || "Bill"}.pdf`;
-  doc.save(filename);
+    
+    doc.setFontSize(11);
+    doc.text("Estimate Details:", rightX + 8, boxY + 18);
+    doc.setFontSize(10);
+    doc.text(`No: ${billData.estimateNo}`, rightX + 8, boxY + 34);
+    doc.text(`Date: ${billData.date}`, rightX + 8, boxY + 50);
+    
+    // Step 4: Prepare table data
+    updateProgressModal(modal, 50, 'Preparing items table...');
+    await delay(10);
+    
+    // PDF table - show adjusted price as base price (customer view)
+    const tableData = billData.items.map((item, idx) => {
+      // Calculate adjusted price per unit (original price + percentage)
+      const adjustedPricePerUnit = item.qty > 0 ? (item.amount / item.qty) : item.price;
+      
+      return [
+        (idx + 1).toString(),
+        item.productName,
+        item.qty.toString(),
+        item.unit,
+        `Rs. ${adjustedPricePerUnit.toFixed(2)}`,
+        `Rs. ${item.amount.toFixed(2)}`
+      ];
+    });
+    
+    // Step 5: Generate table
+    updateProgressModal(modal, 70, 'Generating table...');
+    await delay(10);
+    
+    doc.autoTable({
+      head: [["#", "Item name", "Quantity", "Unit", "Price/Unit(Rs)", "Amount(Rs)"]],
+      body: tableData,
+      startY: boxY + boxH + 20,
+      theme: "grid",
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [60, 60, 60], textColor: 255 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 220 },
+        2: { cellWidth: 65, halign: "right" },
+        3: { cellWidth: 50 },
+        4: { cellWidth: 95, halign: "right" },
+        5: { cellWidth: 95, halign: "right" }
+      }
+    });
+    
+    // Step 6: Add totals
+    updateProgressModal(modal, 85, 'Adding totals...');
+    await delay(10);
+    
+    let y = doc.lastAutoTable.finalY + 8;
+    
+    doc.setFont(undefined, "bold");
+    doc.text(`Total`, 40, y + 15);
+    doc.text(`Rs. ${billData.total.toFixed(2)}`, 500, y + 15, { align: "right" });
+    
+    y += 40;
+    doc.setFont(undefined, "normal");
+    doc.text(`Sub Total :`, 400, y);
+    doc.text(`Rs. ${billData.subTotal.toFixed(2)}`, 575, y, { align: "right" });
+    
+    y += 15;
+    doc.text(`Discount :`, 400, y);
+    doc.text(`Rs. ${billData.discount.toFixed(2)}`, 575, y, { align: "right" });
+    
+    y += 15;
+    doc.setFont(undefined, "bold");
+    doc.text(`Total :`, 400, y);
+    doc.text(`Rs. ${billData.total.toFixed(2)}`, 575, y, { align: "right" });
+    
+    y += 30;
+    doc.setFont(undefined, "normal");
+    doc.text("Invoice Amount in Words:", 40, y);
+    doc.text(amountWordsEl.value, 40, y + 15);
+    
+    y += 40;
+    doc.text("Received :", 400, y);
+    doc.text(`Rs. ${billData.received.toFixed(2)}`, 575, y, { align: "right" });
+    
+    y += 15;
+    doc.text("Balance :", 400, y);
+    doc.text(`Rs. ${billData.balance.toFixed(2)}`, 575, y, { align: "right" });
+    
+    // Step 7: Save
+    updateProgressModal(modal, 95, 'Downloading...');
+    await delay(10);
+    
+    const filename = `${billData.estimateNo} - ${billData.customer.name || "Bill"}.pdf`;
+    doc.save(filename);
+    
+    // Step 8: Complete
+    updateProgressModal(modal, 100, 'Complete!');
+    await delay(500);
+    closeProgressModal(modal);
+    
+    // Show success notification
+    showNotification('✅ PDF downloaded successfully!', 'success');
+    
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    closeProgressModal(modal);
+    alert('Error generating PDF: ' + error.message);
+  }
 }
 
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Delay helper for non-blocking async
+ */
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Create progress modal UI
+ */
+function createProgressModal() {
+  const modal = document.createElement('div');
+  modal.id = 'pdfProgressModal';
+  modal.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.2s ease;
+    ">
+      <div style="
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        min-width: 320px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      ">
+        <h3 style="margin: 0 0 20px 0; color: #333; font-size: 18px;">📄 Generating PDF</h3>
+        <div style="
+          background: #f1f1f3;
+          border-radius: 10px;
+          height: 10px;
+          overflow: hidden;
+          margin-bottom: 15px;
+        ">
+          <div id="pdfProgressBar" style="
+            background: linear-gradient(90deg, #ff6363, #ff8787);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+          "></div>
+        </div>
+        <p id="pdfProgressText" style="
+          margin: 0;
+          color: #777;
+          font-size: 14px;
+        ">Starting...</p>
+      </div>
+    </div>
+  `;
+  
+  // Add fade in animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  `;
+  if (!document.querySelector('style[data-pdf-modal]')) {
+    style.setAttribute('data-pdf-modal', 'true');
+    document.head.appendChild(style);
+  }
+  
+  return modal;
+}
+
+/**
+ * Update progress modal
+ */
+function updateProgressModal(modal, progress, message) {
+  const bar = modal.querySelector('#pdfProgressBar');
+  const text = modal.querySelector('#pdfProgressText');
+  
+  if (bar) bar.style.width = progress + '%';
+  if (text) text.textContent = message;
+}
+
+/**
+ * Close progress modal
+ */
+function closeProgressModal(modal) {
+  if (modal && modal.parentNode) {
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.3s';
+    setTimeout(() => modal.remove(), 300);
+  }
+}
+
+/**
+ * Show notification helper
+ */
+function showNotification(message, type = 'info') {
+  let notification = document.getElementById('globalNotification');
+  
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'globalNotification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideInRight 0.3s ease;
+    `;
+    
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `;
+    if (!document.querySelector('style[data-notification]')) {
+      style.setAttribute('data-notification', 'true');
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+  }
+  
+  const colors = {
+    success: '#4caf50',
+    error: '#f44336',
+    info: '#2196f3',
+    warning: '#ffc107'
+  };
+  
+  notification.style.background = colors[type] || colors.info;
+  notification.textContent = message;
+  notification.style.display = 'block';
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.3s';
+    setTimeout(() => {
+      notification.style.display = 'none';
+      notification.style.opacity = '1';
+    }, 300);
+  }, 3000);
+}
+
+// ============================================
 // ============================================
 // NUMBER TO WORDS
 // ============================================

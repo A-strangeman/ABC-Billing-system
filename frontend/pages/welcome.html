@@ -24,7 +24,7 @@
     <main class="content">
       <header>
         <h1>Welcome to ABC Company</h1>
-        <button id="logoutBtn" class="btn-logout">Logout</button>
+        <button id="logoutBtn" class="btn-logout" onclick="handleLogout()">Logout</button>
       </header>
       
       <section class="welcome-grid">
@@ -70,14 +70,51 @@
 
   <script src="../api.js"></script>
   <script src="../store.js"></script>
-  <script src="../router.js"></script>
+  <script src="../js/auth-guard.js"></script>
   <script>
+    // ============================================
+    // LOGOUT FUNCTION
+    // ============================================
+    function handleLogout() {
+      console.log("🔴 Logout button clicked");
+      
+      if (confirm('Are you sure you want to logout?')) {
+        console.log("👋 Logging out...");
+        
+        // Clear all stored authentication data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userRole');
+        sessionStorage.clear();
+        
+        // Redirect to login page (multiple approaches for reliability)
+        console.log("📍 Current location:", window.location.href);
+        console.log("📍 Redirecting to index.html");
+        
+        // Try different redirect methods
+        window.location.href = '../index.html';
+        
+        // Backup: Force redirect after 100ms if first attempt fails
+        setTimeout(() => {
+          if (window.location.pathname.includes('welcome.html')) {
+            window.location.replace('../index.html');
+          }
+        }, 100);
+      }
+    }
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
     // Get bill total with fallback for different field names
     function getBillTotal(bill) {
       return bill.total || bill.grandTotal || bill.totalAmount || 0;
     }
 
-    // Load dashboard data
+    // ============================================
+    // LOAD DASHBOARD DATA
+    // ============================================
     async function loadDashboard() {
       try {
         console.log("📊 Loading dashboard data...");
@@ -155,6 +192,10 @@
       }
     }
     
+    // ============================================
+    // NAVIGATION FUNCTIONS
+    // ============================================
+    
     function editDraft(draftId) {
       console.log("Editing draft:", draftId);
       sessionStorage.setItem('editDraftId', draftId);
@@ -167,15 +208,12 @@
       window.location.href = 'edit-bill.html';
     }
     
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    
     // Load on page ready
     document.addEventListener('DOMContentLoaded', loadDashboard);
-    
-    // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-      if (confirm('Are you sure you want to logout?')) {
-        window.location.href = '../index.html';
-      }
-    });
   </script>
 </body>
 </html>

@@ -111,6 +111,18 @@
     .success-msg.show {
       display: block;
     }
+    
+    .cache-warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+    
+    .cache-warning strong {
+      color: #856404;
+    }
   </style>
 </head>
 <body>
@@ -131,6 +143,11 @@
         <h1>⚙️ Manage Catalog</h1>
         <button onclick="history.back()" class="btn-back">← Back</button>
       </header>
+
+      <div class="cache-warning">
+        <strong>💡 Note:</strong> After adding/deleting items, the catalog cache will be automatically cleared. 
+        Changes will appear immediately in billing pages.
+      </div>
 
       <div class="admin-grid">
         <!-- CATEGORY SECTION -->
@@ -198,8 +215,18 @@
   </div>
 
   <script src="../api.js"></script>
+  <script src="../js/auth-guard.js"></script>
   <script>
     let catalog = { categories: [], materials: [], sizes: [], fittings: [] };
+
+    // ============================================
+    // CLEAR CATALOG CACHE - KEY FUNCTION
+    // ============================================
+    function clearCatalogCache() {
+      localStorage.removeItem('catalog_data');
+      localStorage.removeItem('catalog_time');
+      console.log("🗑️ Catalog cache cleared - changes will appear immediately!");
+    }
 
     // ============================================
     // LOAD CATALOG
@@ -319,7 +346,7 @@
     }
 
     // ============================================
-    // ADD FUNCTIONS
+    // ADD FUNCTIONS - WITH CACHE CLEARING
     // ============================================
     async function addCategory() {
       const name = document.getElementById('categoryName').value.trim();
@@ -337,15 +364,18 @@
         console.log("➕ Adding category:", name);
         await API.addCategory({ name });
         
+        // ✅ CLEAR CACHE IMMEDIATELY
+        clearCatalogCache();
+        
         document.getElementById('categoryName').value = '';
         showSuccess('categorySuccess');
         
-        // Reload catalog to get updated data
+        // Reload catalog
         await loadCatalog();
         
       } catch (error) {
         console.error("❌ Error adding category:", error);
-        alert('Failed to add category: ' + error.message);
+        alert('Failed to add category: ' + (error.error || error.message));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Add';
@@ -373,6 +403,9 @@
         console.log("➕ Adding material:", { categoryId, name });
         await API.addMaterial({ categoryId, name });
         
+        // ✅ CLEAR CACHE IMMEDIATELY
+        clearCatalogCache();
+        
         document.getElementById('materialName').value = '';
         showSuccess('materialSuccess');
         
@@ -380,7 +413,7 @@
         
       } catch (error) {
         console.error("❌ Error adding material:", error);
-        alert('Failed to add material: ' + error.message);
+        alert('Failed to add material: ' + (error.error || error.message));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Add';
@@ -408,6 +441,9 @@
         console.log("➕ Adding size:", { materialId, value });
         await API.addSize({ materialId, value });
         
+        // ✅ CLEAR CACHE IMMEDIATELY
+        clearCatalogCache();
+        
         document.getElementById('sizeValue').value = '';
         showSuccess('sizeSuccess');
         
@@ -415,7 +451,7 @@
         
       } catch (error) {
         console.error("❌ Error adding size:", error);
-        alert('Failed to add size: ' + error.message);
+        alert('Failed to add size: ' + (error.error || error.message));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Add';
@@ -443,6 +479,9 @@
         console.log("➕ Adding fitting:", { materialId, name });
         await API.addFitting({ materialId, name });
         
+        // ✅ CLEAR CACHE IMMEDIATELY
+        clearCatalogCache();
+        
         document.getElementById('fittingName').value = '';
         showSuccess('fittingSuccess');
         
@@ -450,7 +489,7 @@
         
       } catch (error) {
         console.error("❌ Error adding fitting:", error);
-        alert('Failed to add fitting: ' + error.message);
+        alert('Failed to add fitting: ' + (error.error || error.message));
       } finally {
         btn.disabled = false;
         btn.textContent = 'Add';
@@ -458,26 +497,62 @@
     }
 
     // ============================================
-    // DELETE FUNCTIONS (PLACEHOLDER)
+    // DELETE FUNCTIONS - WITH CACHE CLEARING
     // ============================================
     async function deleteCategory(id) {
-      if (!confirm('Delete this category?')) return;
-      alert('Delete functionality needs backend route: DELETE /api/catalog/categories/:id');
+      if (!confirm('Delete this category and all its materials?')) return;
+      
+      try {
+        await API.deleteCategory(id);
+        clearCatalogCache(); // ✅ Clear cache
+        await loadCatalog();
+        alert('✓ Category deleted');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete: ' + (error.error || error.message));
+      }
     }
 
     async function deleteMaterial(id) {
-      if (!confirm('Delete this material?')) return;
-      alert('Delete functionality needs backend route: DELETE /api/catalog/materials/:id');
+      if (!confirm('Delete this material and all its sizes/fittings?')) return;
+      
+      try {
+        await API.deleteMaterial(id);
+        clearCatalogCache(); // ✅ Clear cache
+        await loadCatalog();
+        alert('✓ Material deleted');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete: ' + (error.error || error.message));
+      }
     }
 
     async function deleteSize(id) {
       if (!confirm('Delete this size?')) return;
-      alert('Delete functionality needs backend route: DELETE /api/catalog/sizes/:id');
+      
+      try {
+        await API.deleteSize(id);
+        clearCatalogCache(); // ✅ Clear cache
+        await loadCatalog();
+        alert('✓ Size deleted');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete: ' + (error.error || error.message));
+      }
     }
 
     async function deleteFitting(id) {
       if (!confirm('Delete this fitting?')) return;
-      alert('Delete functionality needs backend route: DELETE /api/catalog/fittings/:id');
+      
+      try {
+        await API.deleteFitting(id);
+        clearCatalogCache(); // ✅ Clear cache
+        await loadCatalog();
+        alert('✓ Fitting deleted');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete: ' + (error.error || error.message));
+      }
     }
 
     // ============================================

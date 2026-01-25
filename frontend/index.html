@@ -71,14 +71,8 @@
       border-color: #ff6363;
     }
     
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 30px;
-    }
-    
     button {
-      flex: 1;
+      width: 100%;
       padding: 12px;
       border: none;
       border-radius: 10px;
@@ -86,6 +80,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin-top: 10px;
     }
     
     .btn-login {
@@ -99,13 +94,10 @@
       box-shadow: 0 5px 15px rgba(255,99,99,0.3);
     }
     
-    .btn-guest {
-      background: #f0f0f0;
-      color: #333;
-    }
-    
-    .btn-guest:hover {
-      background: #e0e0e0;
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
     }
     
     .error {
@@ -119,6 +111,17 @@
     }
     
     .error.show {
+      display: block;
+    }
+    
+    .loading {
+      text-align: center;
+      color: #999;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .loading.show {
       display: block;
     }
   </style>
@@ -140,6 +143,7 @@
           id="username" 
           placeholder="Enter username"
           autocomplete="username"
+          required
         />
       </div>
       
@@ -150,55 +154,103 @@
           id="password" 
           placeholder="Enter password"
           autocomplete="current-password"
+          required
         />
       </div>
       
-      <div class="btn-group">
-        <button type="submit" class="btn-login">Login as Admin</button>
-        <button type="button" class="btn-guest" onclick="guestLogin()">Guest Mode</button>
-      </div>
+      <button type="submit" class="btn-login" id="loginBtn">Login</button>
+      <p class="loading" id="loadingMsg">Logging in...</p>
     </form>
   </div>
 
   <script>
-    // Simple login (you can add real authentication later)
-    const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "admin123";
+    const API_BASE = "http://localhost:5000/api";
     
     const form = document.getElementById('loginForm');
     const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingMsg = document.getElementById('loadingMsg');
     
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        // Store login status
-        sessionStorage.setItem('isAdmin', 'true');
-        sessionStorage.setItem('username', username);
+      if (!username || !password) {
+        showError('Please enter both username and password');
+        return;
+      }
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+      loadingMsg.classList.add('show');
+      errorMsg.classList.remove('show');
+      
+      try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+        
+        // Store token and user info
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('username', data.user.username);
+        localStorage.setItem('userRole', data.user.role);
         
         // Redirect to welcome page
         window.location.href = 'pages/welcome.html';
-      } else {
-        errorMsg.textContent = '❌ Invalid username or password';
-        errorMsg.classList.add('show');
         
-        setTimeout(() => {
-          errorMsg.classList.remove('show');
-        }, 3000);
+      } catch (error) {
+        console.error('Login error:', error);
+        showError(error.message || 'Login failed. Please try again.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+        loadingMsg.classList.remove('show');
       }
     });
     
-    function guestLogin() {
-      sessionStorage.setItem('isAdmin', 'false');
-      sessionStorage.setItem('username', 'Guest');
-      window.location.href = 'pages/welcome.html';
+    function showError(message) {
+      errorMsg.textContent = '❌ ' + message;
+      errorMsg.classList.add('show');
+      
+      setTimeout(() => {
+        errorMsg.classList.remove('show');
+      }, 5000);
     }
     
-    // Auto-focus username
-    document.getElementById('username').focus();
+    // Check if already logged in
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        // Verify token is still valid
+        fetch(`${API_BASE}/auth/verify`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => {
+          if (res.ok) {
+            window.location.href = 'pages/welcome.html';
+          } else {
+            // Token expired, clear it
+            localStorage.removeItem('authToken');
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('authToken');
+        });
+      }
+      
+      // Auto-focus username
+      document.getElementById('username').focus();
+    });
   </script>
 </body>
 </html>
