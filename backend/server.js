@@ -41,7 +41,8 @@ const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',')
   : [
       'http://localhost:5500',
-      'http://127.0.0.1:5500'
+      'http://127.0.0.1:5500',
+      'https://abc-billing-system.vercel.app'
     ];
 
 console.log('🔒 Allowed CORS origins:', allowedOrigins);
@@ -118,15 +119,38 @@ app.get("/api", (req, res) => {
   });
 });
 
-// Catch-all for undefined routes
-app.use("/api/*", (req, res) => {
-  console.log('❌ 404 - Route not found:', req.path);
-  res.status(404).json({ 
-    error: "API route not found",
-    path: req.path,
-    method: req.method,
-    message: "Check the API endpoint and try again"
+// IMPORTANT: Root path handler for Vercel
+app.get("/", (req, res) => {
+  res.json({
+    message: "ABC Company Billing API",
+    status: "running",
+    version: "1.0.0",
+    note: "Add /api prefix to access endpoints",
+    endpoints: {
+      auth: "/api/auth",
+      catalog: "/api/catalog",
+      bills: "/api/bills",
+      customers: "/api/customers",
+      drafts: "/api/drafts",
+      reports: "/api/reports",
+      health: "/api/health"
+    }
   });
+});
+
+// Catch-all for undefined API routes (must be AFTER all route definitions)
+app.use((req, res, next) => {
+  // Only handle unmatched routes
+  if (req.path.startsWith('/api/')) {
+    console.log('❌ 404 - API route not found:', req.path);
+    return res.status(404).json({ 
+      error: "API route not found",
+      path: req.path,
+      method: req.method,
+      message: "Check the API endpoint and try again"
+    });
+  }
+  next();
 });
 
 // Global error handler
@@ -165,7 +189,7 @@ if (require.main === module) {
   connectDB().then(() => {
     app.listen(PORT, () => {
       console.log('✅ Server running on port', PORT);
-      console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
+      console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
       console.log('📊 MongoDB:', process.env.MONGO_URI ? 'Connected' : 'Not configured');
     });
   }).catch(err => {
