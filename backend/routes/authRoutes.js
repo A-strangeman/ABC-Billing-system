@@ -1,5 +1,5 @@
 // ============================================
-// authRoutes.js - Secure Authentication (Vercel Safe)
+// authRoutes.js - FIXED FOR VERCEL CORS
 // backend/routes/authRoutes.js
 // ============================================
 
@@ -11,6 +11,9 @@ const { User } = require("../models");
 
 // JWT Secret (MUST be set in Vercel env)
 const JWT_SECRET = process.env.JWT_SECRET || "change-this-secret";
+
+// Check if we're in production
+const isProduction = process.env.NODE_ENV === 'production';
 
 // ============================================
 // REGISTER USER (Admin / Cashier / Viewer)
@@ -54,10 +57,12 @@ router.post("/register", async (req, res) => {
 });
 
 // ============================================
-// LOGIN - SET JWT IN HTTPONLY COOKIE
+// LOGIN - FIXED COOKIE SETTINGS FOR VERCEL
 // ============================================
 router.post("/login", async (req, res) => {
   try {
+    console.log('🔐 Login attempt:', req.body.username);
+    
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -84,24 +89,32 @@ router.post("/login", async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    // ✅ STORE TOKEN IN COOKIE (Vercel Safe)
-    res.cookie("token", token, {
+    // ✅ FIXED COOKIE SETTINGS FOR VERCEL
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,        // REQUIRED on Vercel
-      sameSite: "None",    // REQUIRED for cross-domain
-      maxAge: 24 * 60 * 60 * 1000
-    });
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction, // Only secure in production
+      path: '/'
+    };
 
+    console.log('🍪 Setting cookie with options:', cookieOptions);
+    res.cookie("token", token, cookieOptions);
+
+    console.log('✅ Login successful:', user.username);
+    
     res.json({
       success: true,
       message: "Login successful",
       user: {
         username: user.username,
         role: user.role
-      }
+      },
+      token: token // Also send token in response for backup
     });
 
   } catch (error) {
+    console.error('❌ Login error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -176,11 +189,14 @@ router.post("/change-password", async (req, res) => {
 // LOGOUT - CLEAR COOKIE
 // ============================================
 router.post("/logout", (req, res) => {
-  res.clearCookie("token", {
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None"
-  });
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    path: '/'
+  };
+  
+  res.clearCookie("token", cookieOptions);
 
   res.json({ success: true, message: "Logged out successfully" });
 });
