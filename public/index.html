@@ -163,94 +163,127 @@
     </form>
   </div>
 
-  <script>
-    const API_BASE = "/api";
+<script>
+  // ✅ FIXED: Use same logic as api.js
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : 'https://abc-billing-system.vercel.app/api';
+  
+  console.log('🌐 Login API URL:', API_BASE);
+  
+  const form = document.getElementById('loginForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const loginBtn = document.getElementById('loginBtn');
+  const loadingMsg = document.getElementById('loadingMsg');
+  
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    const form = document.getElementById('loginForm');
-    const errorMsg = document.getElementById('errorMsg');
-    const loginBtn = document.getElementById('loginBtn');
-    const loadingMsg = document.getElementById('loadingMsg');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
     
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      
-      if (!username || !password) {
-        showError('Please enter both username and password');
-        return;
-      }
-      
-      // Show loading state
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Logging in...';
-      loadingMsg.classList.add('show');
-      errorMsg.classList.remove('show');
-      
-      try {
-        const response = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Login failed');
-        }
-        
-        // Store token and user info
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('username', data.user.username);
-        localStorage.setItem('userRole', data.user.role);
-        
-        // Redirect to welcome page
-        window.location.href = 'pages/welcome.html';
-        
-      } catch (error) {
-        console.error('Login error:', error);
-        showError(error.message || 'Login failed. Please try again.');
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-        loadingMsg.classList.remove('show');
-      }
-    });
-    
-    function showError(message) {
-      errorMsg.textContent = '❌ ' + message;
-      errorMsg.classList.add('show');
-      
-      setTimeout(() => {
-        errorMsg.classList.remove('show');
-      }, 5000);
+    if (!username || !password) {
+      showError('Please enter both username and password');
+      return;
     }
     
-    // Check if already logged in
-    window.addEventListener('DOMContentLoaded', () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        // Verify token is still valid
-        fetch(`${API_BASE}/auth/verify`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(res => {
-          if (res.ok) {
-            window.location.href = 'pages/welcome.html';
-          } else {
-            // Token expired, clear it
-            localStorage.removeItem('authToken');
-          }
-        })
-        .catch(() => {
-          localStorage.removeItem('authToken');
-        });
+    // Show loading state
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+    loadingMsg.classList.add('show');
+    errorMsg.classList.remove('show');
+    
+    try {
+      const requestBody = { username, password };
+      console.log('📡 Sending login request to:', `${API_BASE}/auth/login`);
+      console.log('📦 Request body:', requestBody);
+      
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(requestBody) // ✅ FIXED: Added this line!
+      });
+      
+      console.log('📥 Response status:', response.status);
+      
+      // ✅ Better error handling
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
       
-      // Auto-focus username
-      document.getElementById('username').focus();
-    });
-  </script>
+      const data = await response.json();
+      console.log('📥 Response data:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      // Store token and user info
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('username', data.user.username);
+      localStorage.setItem('userRole', data.user.role);
+      
+      console.log('✅ Login successful, redirecting...');
+      
+      // Redirect to welcome page
+      window.location.href = 'pages/welcome.html';
+      
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      showError(error.message || 'Login failed. Please try again.');
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
+      loadingMsg.classList.remove('show');
+    }
+  });
+  
+  function showError(message) {
+    errorMsg.textContent = '❌ ' + message;
+    errorMsg.classList.add('show');
+    
+    setTimeout(() => {
+      errorMsg.classList.remove('show');
+    }, 5000);
+  }
+  
+  // Check if already logged in
+  window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      console.log('🔍 Checking existing token...');
+      fetch(`${API_BASE}/auth/verify`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(res => {
+        if (res.ok) {
+          console.log('✅ Token valid, redirecting to dashboard');
+          window.location.href = 'pages/welcome.html';
+        } else {
+          console.log('❌ Token invalid, clearing...');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('username');
+          localStorage.removeItem('userRole');
+        }
+      })
+      .catch(err => {
+        console.error('❌ Token check failed:', err);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userRole');
+      });
+    }
+    
+    // Auto-focus username
+    document.getElementById('username').focus();
+  });
+</script>
 </body>
 </html>

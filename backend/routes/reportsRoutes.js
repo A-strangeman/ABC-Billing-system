@@ -7,6 +7,17 @@ const express = require("express");
 const router = express.Router();
 const { Bill } = require("../models");
 
+
+// Add at the TOP of reportsRoutes.js, before other routes
+router.get("/ping", (req, res) => {
+  console.log("📍 Reports ping endpoint hit!");
+  res.json({ 
+    message: "Reports routes are working!",
+    timestamp: new Date().toISOString()
+  });
+});
+
+
 // ============================================
 // GET REPORT SUMMARY - Super Fast Aggregation
 // ============================================

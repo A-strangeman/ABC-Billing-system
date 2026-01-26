@@ -185,20 +185,15 @@
     </main>
   </div>
 
-  <!-- Chart.js Library -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> -->
-  <script 
-  src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" 
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer">
-</script>
+  <!-- ✅ FIXED: Correct script loading order -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" 
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/store.js"></script>
-  <script src="../js/billing.js"></script>
   <script src="../js/auth-guard.js"></script>
-  <script src="../js/pdf-generator.js"></script>
-  <script src="../js/router.js"></script>
+  <!-- ✅ THIS WAS MISSING - THE ROOT CAUSE! -->
+  <script src="../js/reports.js"></script>
 </body>
 </html>

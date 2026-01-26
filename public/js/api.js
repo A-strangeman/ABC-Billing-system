@@ -109,9 +109,11 @@ const API = {
   
   getBills: (page = 1, limit = 20) => apiFetch(`/bills?page=${page}&limit=${limit}`),
   
+  getAllBills: (page = 1, limit = 20) => apiFetch(`/bills?page=${page}&limit=${limit}`), // ✅ ADD THIS
+  
   getBill: (id) => apiFetch(`/bills/${id}`),
   
-  getBillById: (id) => apiFetch(`/bills/${id}`), // ADDED - alias for consistency
+  getBillById: (id) => apiFetch(`/bills/${id}`),
   
   updateBill: (id, billData) => apiFetch(`/bills/${id}`, {
     method: 'PUT',
@@ -151,9 +153,11 @@ const API = {
   
   getDrafts: () => apiFetch('/drafts'),
   
+  getAllDrafts: () => apiFetch('/drafts'), // ✅ ADD THIS
+  
   getDraft: (draftId) => apiFetch(`/drafts/${draftId}`),
   
-  getDraftById: (draftId) => apiFetch(`/drafts/${draftId}`), // ADDED - alias for consistency
+  getDraftById: (draftId) => apiFetch(`/drafts/${draftId}`),
   
   deleteDraft: (draftId) => apiFetch(`/drafts/${draftId}`, { method: 'DELETE' }),
   

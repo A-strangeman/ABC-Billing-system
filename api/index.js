@@ -1,2 +1,4 @@
-// api/index.js - SIMPLIFIED
-module.exports = require('../backend/server.js');
+// api/index.js (Vercel entry point)
+const app = require('../backend/server');
+
+module.exports = app;

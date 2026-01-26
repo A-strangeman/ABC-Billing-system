@@ -46,12 +46,16 @@ async function init() {
 // ============================================
 async function loadReportsData() {
   try {
+    console.log('📊 Reports API calls starting...');
+    console.log('📅 Date range:', dateFrom, 'to', dateTo);
+    
     showLoadingState();
     
     dateFrom = document.getElementById('dateFrom').value;
     dateTo = document.getElementById('dateTo').value;
     
-    console.log(`📅 Loading reports: ${dateFrom} to ${dateTo}`);
+   
+    // ... rest of your code
     
     // Parallel API calls for maximum speed
     const [
