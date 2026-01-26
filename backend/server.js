@@ -1,9 +1,10 @@
-// backend/server.js - MODIFIED FOR VERCEL
+// backend/server.js - FIXED FOR VERCEL
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const compression = require("compression");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
 dotenv.config();
@@ -35,23 +36,26 @@ async function connectToDatabase() {
 // MIDDLEWARE
 // ============================================
 
-// CORS - FIX FOR VERCEL
-const allowedOrigins = [
-  'https://abc-billing-system.vercel.app/', // ⚠️ REPLACE THIS
-  'http://localhost:5500',
-  'http://127.0.0.1:5500'
-];
+// CORS - FIXED FOR VERCEL with Environment Variable
+const allowedOrigins = process.env.FRONTEND_URL 
+  ? process.env.FRONTEND_URL.split(',')
+  : [
+      'http://localhost:5500',
+      'http://127.0.0.1:5500'
+    ];
+
+console.log('🔒 Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (mobile apps, Postman, curl, etc.)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed.trim()))) {
       callback(null, true);
     } else {
-      console.log('Blocked origin:', origin);
-      callback(null, false); // Don't throw error, just block
+      console.log('⚠️ Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
@@ -61,21 +65,29 @@ app.use(cors({
 
 // Security headers
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable for now, enable later
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
 
 app.use(compression());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // ============================================
 // ROUTES
 // ============================================
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/catalog", require("./routes/catalogRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/drafts", require("./routes/draftRoutes"));
-app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/reports", require("./routes/reportsRoutes"));
 
 // Health check
@@ -83,22 +95,48 @@ app.get("/api/health", (req, res) => {
   res.json({ 
     status: "OK", 
     timestamp: new Date().toISOString(),
-    connected: isConnected
+    connected: isConnected,
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-app.get("/", (req, res) => {
+// Root endpoint
+app.get("/api", (req, res) => {
   res.json({
     message: "ABC Company Billing API",
     status: "running",
+    version: "1.0.0",
     endpoints: {
+      auth: "/api/auth",
       catalog: "/api/catalog",
       bills: "/api/bills",
       customers: "/api/customers",
       drafts: "/api/drafts",
-      auth: "/api/auth",
-      reports: "/api/reports"
+      reports: "/api/reports",
+      health: "/api/health"
     }
+  });
+});
+
+// Catch-all for undefined routes
+app.use("/api/*", (req, res) => {
+  console.log('❌ 404 - Route not found:', req.path);
+  res.status(404).json({ 
+    error: "API route not found",
+    path: req.path,
+    method: req.method,
+    message: "Check the API endpoint and try again"
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err.message);
+  console.error(err.stack);
+  
+  res.status(err.statusCode || 500).json({ 
+    error: err.message || "Internal server error",
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
 
@@ -110,19 +148,28 @@ module.exports = async (req, res) => {
     await connectToDatabase();
     return app(req, res);
   } catch (error) {
-    console.error("Serverless handler error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("❌ Serverless handler error:", error);
+    return res.status(500).json({ 
+      error: "Database connection failed",
+      message: error.message 
+    });
   }
 };
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
-
-// For local development
+// ============================================
+// LOCAL DEVELOPMENT SERVER
+// ============================================
 if (require.main === module) {
-  connectDB();
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log('✅ Server running on port', PORT);
+      console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
+      console.log('📊 MongoDB:', process.env.MONGO_URI ? 'Connected' : 'Not configured');
+    });
+  }).catch(err => {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
   });
 }
