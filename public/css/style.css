@@ -1,5 +1,6 @@
 /* ============================================
-   MODERN BILLING SYSTEM - COMPLETE STYLES
+   ULTRA-OPTIMIZED BILLING SYSTEM - NO SCROLL
+   Removed % column, optimized for 14" screens
    ============================================ */
 
 :root {
@@ -254,58 +255,72 @@ button {
 }
 
 /* ============================================
-   BILLING PAGE LAYOUT
+   BILLING PAGE LAYOUT - OPTIMIZED PROPORTIONS
+   Left panel wider, right panel more compact
    ============================================ */
 
 .billing-header {
   background: var(--accent);
   color: #fff;
-  padding: 15px 20px;
-  font-size: 1.5rem;
+  padding: 10px 20px;
+  font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
 }
 
 .layout {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 45px);
+  gap: 8px;
+  padding: 8px;
 }
 
+/* LEFT PANEL - 60% of screen width */
 .left {
-  flex: 2;
+  flex: 2.25;
   background: var(--card);
-  margin: 15px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px;
+  padding: 12px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
+.left h2 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+/* RIGHT PANEL - 40% of screen width */
 .right {
-  flex: 1;
+  flex: 1.5;
   background: var(--card);
-  margin: 15px 15px 15px 0;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px;
+  padding: 10px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 45px);
 }
 
 /* ============================================
-   FORM ELEMENTS
+   FORM ELEMENTS - ULTRA COMPACT
    ============================================ */
 
 .bill-header {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 label {
   display: block;
-  font-size: 0.85rem;
-  margin-bottom: 5px;
+  font-size: 0.75rem;
+  margin-bottom: 3px;
   color: #555;
   font-weight: 600;
 }
@@ -316,10 +331,10 @@ input[type="number"],
 select,
 textarea {
   width: 100%;
-  padding: 8px 10px;
+  padding: 5px 7px;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
   transition: border-color 0.2s ease;
 }
 
@@ -337,25 +352,47 @@ input[readonly] {
 
 textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 40px;
   font-family: inherit;
 }
 
 /* ============================================
-   TABLE
+   TABLE - COMPACT & FITS WITHOUT SCROLLING
+   Removed % column for more space
    ============================================ */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 15px 0;
+  margin: 8px 0;
+  font-size: 0.8rem;
 }
 
 th, td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 4px 6px;
   text-align: center;
-  font-size: 0.9rem;
+}
+
+/* Optimized column widths without % column */
+#billTable th:nth-child(1) { width: 5%; }   /* S.No */
+#billTable th:nth-child(2) { width: 35%; }  /* Product Name - MORE SPACE */
+#billTable th:nth-child(3) { width: 12%; }  /* Quantity */
+#billTable th:nth-child(4) { width: 10%; }  /* Unit */
+#billTable th:nth-child(5) { width: 15%; }  /* Price */
+#billTable th:nth-child(6) { width: 18%; }  /* Amount - MORE SPACE */
+#billTable th:nth-child(7) { width: 5%; }   /* Action */
+
+/* Make table inputs smaller */
+#billTable input,
+#billTable select {
+  padding: 3px 5px;
+  font-size: 0.75rem;
+}
+
+/* Make product name input smaller font */
+#billTable .productName {
+  font-size: 0.73rem;
 }
 
 thead th {
@@ -364,6 +401,8 @@ thead th {
   font-weight: 600;
   position: sticky;
   top: 0;
+  font-size: 0.75rem;
+  padding: 6px 4px;
 }
 
 tbody tr {
@@ -383,14 +422,15 @@ tbody tr.active {
 .row-total {
   font-weight: 600;
   color: var(--accent);
+  font-size: 0.8rem;
 }
 
 .del {
   background: var(--danger);
   color: #fff;
-  padding: 5px 10px;
-  font-size: 1.2rem;
-  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 1rem;
+  border-radius: 4px;
 }
 
 .del:hover {
@@ -398,84 +438,182 @@ tbody tr.active {
 }
 
 /* ============================================
-   ACTIONS & TOTALS
+   ACTIONS & TOTALS - COMPACT
    ============================================ */
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin: 15px 0;
+  gap: 6px;
+  margin: 8px 0;
   flex-wrap: wrap;
+}
+
+.actions button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
 }
 
 .totals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.totals label {
+  font-size: 0.7rem;
+}
+
+.totals input {
+  padding: 4px 6px;
+  font-size: 0.8rem;
 }
 
 .amount-words {
-  margin-top: 15px;
+  margin-top: 8px;
+}
+
+.amount-words label {
+  font-size: 0.75rem;
+  margin-bottom: 3px;
+}
+
+.amount-words textarea {
+  font-size: 0.75rem;
+  min-height: 35px;
 }
 
 /* ============================================
-   RIGHT PANEL - PRODUCT BUILDER
+   RIGHT PANEL - ULTRA COMPACT GRID LAYOUT
+   NO SCROLLING - ALL SECTIONS VISIBLE
    ============================================ */
 
 .note {
   background: #fff9e6;
-  border-left: 4px solid var(--warning);
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-  border-radius: 6px;
+  border-left: 3px solid var(--warning);
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  line-height: 1.4;
 }
 
 .section-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 15px 0 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 6px 0 4px;
   color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 3px;
 }
 
+/* ULTRA COMPACT CHIP LAYOUT */
 .chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+  max-height: 115px;
+  overflow-y: auto;
+  padding: 3px;
+}
+
+/* Category and Material - slightly larger */
+#categoryRow,
+#materialRow {
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  max-height: 130px;
+}
+
+/* Size - very compact */
+#sizeRow {
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  max-height: 100px;
+}
+
+/* Fitting - compact */
+#fittingRow {
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  max-height: 100px;
+}
+
+/* Price history - full width */
+#priceRow {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  max-height: 90px;
 }
 
 .chip {
   background: #f1f1f3;
   border: 1px solid #ddd;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .chip:hover {
   background: #e8e8ea;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .chip.active {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255,99,99,0.4);
 }
 
 .price-chip {
   background: #e8f5e9;
   border-color: var(--success);
+  font-size: 0.75rem;
+  padding: 5px 8px;
 }
 
 .price-chip:hover {
   background: var(--success);
   color: #fff;
+}
+
+/* Minimal scrollbar */
+.chip-row::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.chip-row::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.chip-row::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+.chip-row::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
+}
+
+/* ============================================
+   SECTIONS - ALL VISIBLE
+   ============================================ */
+
+.product-builder-section {
+  flex-shrink: 0;
+  margin-bottom: 6px;
 }
 
 /* ============================================
@@ -585,16 +723,101 @@ tbody tr.active {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - OPTIMIZED FOR 14" SCREENS
    ============================================ */
 
-@media (max-width: 968px) {
+/* Perfect for 14-16 inch laptops */
+@media (min-width: 1280px) and (max-width: 1920px) {
   .layout {
-    flex-direction: column;
+    height: calc(100vh - 45px);
   }
   
   .right {
-    margin: 0 15px 15px;
+    max-height: calc(100vh - 65px);
+  }
+  
+  /* Ensure everything fits */
+  .chip-row {
+    max-height: 115px;
+  }
+  
+  #categoryRow,
+  #materialRow {
+    max-height: 130px;
+  }
+}
+
+/* For small 14-inch laptops (1366px) */
+@media (max-width: 1366px) {
+  .billing-header {
+    padding: 8px 15px;
+    font-size: 1.1rem;
+  }
+  
+  .layout {
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .left,
+  .right {
+    padding: 8px;
+  }
+  
+  .left h2 {
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 0.7rem;
+    margin: 5px 0 3px;
+  }
+  
+  .chip {
+    font-size: 0.68rem;
+    padding: 3px 6px;
+  }
+  
+  .chip-row {
+    gap: 3px;
+    max-height: 105px;
+  }
+  
+  #categoryRow,
+  #materialRow {
+    max-height: 120px;
+  }
+  
+  #sizeRow,
+  #fittingRow {
+    max-height: 90px;
+  }
+  
+  table {
+    font-size: 0.75rem;
+  }
+  
+  th, td {
+    padding: 3px 4px;
+  }
+  
+  #billTable input,
+  #billTable select {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+}
+
+/* For tablets and mobile */
+@media (max-width: 968px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .right {
+    margin: 0;
+    max-height: 400px;
   }
   
   .sidebar {
@@ -606,6 +829,14 @@ tbody tr.active {
   .dashboard {
     flex-direction: column;
     height: auto;
+  }
+  
+  .chip-row {
+    max-height: 200px;
+  }
+  
+  .totals {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -641,4 +872,29 @@ tbody tr.active {
 
 .success {
   color: var(--success);
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
+.left::-webkit-scrollbar,
+.right::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left::-webkit-scrollbar-track,
+.right::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.left::-webkit-scrollbar-thumb,
+.right::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+.left::-webkit-scrollbar-thumb:hover,
+.right::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dark);
 }

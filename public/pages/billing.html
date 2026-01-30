@@ -10,7 +10,7 @@
   <header class="billing-header">ABC Company – Estimate Bill</header>
 
   <div class="layout">
-    <!-- LEFT PANEL - Bill Form -->
+    <!-- LEFT PANEL - Bill Form (WIDER - 65%) -->
     <div class="left">
       <h2>Estimated Bill</h2>
 
@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- Items Table -->
+      <!-- Items Table (WITHOUT % +/- COLUMN) -->
       <table id="billTable">
         <thead>
           <tr>
@@ -44,7 +44,6 @@
             <th>Quantity</th>
             <th>Unit</th>
             <th>Price/Unit (₹)</th>
-            <th>% +/-</th>  <!-- NEW COLUMN -->
             <th>Amount (₹)</th>
             <th>Action</th>
           </tr>
@@ -52,10 +51,10 @@
         <tbody></tbody>
       </table>
 
-      <!-- Action Buttons -->
+      <!-- Action Buttons (With Apply % to All) -->
       <div class="actions">
         <button id="addRowBtn" class="btn-secondary">+ Add Row</button>
-        <button id="applyPercentBtn" class="btn-info">📊 Apply % to All</button>  <!-- NEW BUTTON -->
+        <button id="applyPercentBtn" class="btn-info">📊 Apply % to All</button>
         <button id="saveDraftBtn" class="btn-secondary">💾 Save Draft</button>
         <button id="downloadBtn" class="btn-primary">⬇️ Download PDF</button>
         <button id="saveBtn" class="btn-success">✓ Save & Finalize</button>
@@ -100,39 +99,41 @@
       </div>
     </div>
 
-    <!-- RIGHT PANEL - Dynamic Product Builder -->
+    <!-- RIGHT PANEL - Product Builder (COMPACT - 35%) -->
     <div class="right">
       <div class="note">
-        💡 Click a row on the left to select it. Then choose category → material → size → fitting to build the product name automatically.
+        💡 Click a row, then select: category → material → size → fitting
       </div>
 
-      <!-- Categories -->
-      <div class="section-title">Category</div>
-      <div class="chip-row" id="categoryRow">
-        <p class="loading">Loading categories...</p>
+      <!-- Category Section -->
+      <div class="product-builder-section" id="categorySection">
+        <div class="section-title">📂 CATEGORY</div>
+        <div class="chip-row" id="categoryRow">
+          <p class="loading">Loading...</p>
+        </div>
       </div>
 
-      <!-- Materials (Dynamic) -->
-      <div id="materialSection" style="display: none;">
-        <div class="section-title">Material</div>
+      <!-- Material Section -->
+      <div class="product-builder-section" id="materialSection" style="display: none;">
+        <div class="section-title">🔧 MATERIAL</div>
         <div class="chip-row" id="materialRow"></div>
       </div>
 
-      <!-- Sizes (Dynamic) -->
-      <div id="sizeSection" style="display: none;">
-        <div class="section-title">Size</div>
+      <!-- Size Section -->
+      <div class="product-builder-section" id="sizeSection" style="display: none;">
+        <div class="section-title">📏 SIZE</div>
         <div class="chip-row" id="sizeRow"></div>
       </div>
 
-      <!-- Fittings (Dynamic) -->
-      <div id="fittingSection" style="display: none;">
-        <div class="section-title">Fitting</div>
+      <!-- Fitting Section -->
+      <div class="product-builder-section" id="fittingSection" style="display: none;">
+        <div class="section-title">🔩 FITTING</div>
         <div class="chip-row" id="fittingRow"></div>
       </div>
 
-      <!-- Price Suggestions -->
-      <div id="priceSection" style="display: none;">
-        <div class="section-title">Suggested Prices</div>
+      <!-- Price History Section -->
+      <div class="product-builder-section" id="priceSection" style="display: none;">
+        <div class="section-title">💰 PRICE HISTORY</div>
         <div class="chip-row" id="priceRow"></div>
       </div>
     </div>
