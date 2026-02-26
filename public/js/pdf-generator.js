@@ -153,11 +153,11 @@ class PDFGenerator {
       headStyles: { fillColor: [60, 60, 60], textColor: 255 },
       columnStyles: {
         0: { cellWidth: 25 },
-        1: { cellWidth: 220 },
-        2: { cellWidth: 65, halign: "right" },
-        3: { cellWidth: 50 },
-        4: { cellWidth: 95, halign: "right" },
-        5: { cellWidth: 95, halign: "right" }
+        1: { cellWidth: 200 },
+        2: { cellWidth: 60, halign: "right" },
+        3: { cellWidth: 45 },
+        4: { cellWidth: 90, halign: "right" },
+        5: { cellWidth: 90, halign: "right" }
       }
     });
   }

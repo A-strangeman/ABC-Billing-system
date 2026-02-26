@@ -1,5 +1,5 @@
 // ============================================
-// BILLING.JS - Enhanced with Per-Item Percentage
+// BILLING.JS
 // ============================================
 
 // DOM Elements
@@ -250,9 +250,9 @@ function handlePlyCalculation(productInput, qtyInput, unitSelect) {
 }
 
 // ============================================
-// ADD ROW - ENHANCED with Item Percentage
+// ADD ROW
 // ============================================
-function addRow(productName = "", qty = 1, unit = "Pcs", price = 0, itemPercent = 0) {
+function addRow(productName = "", qty = 0, unit = "Pcs", price = 0) {
   const tr = document.createElement("tr");
   const sn = tbody.querySelectorAll("tr").length + 1;
   
@@ -271,10 +271,7 @@ function addRow(productName = "", qty = 1, unit = "Pcs", price = 0, itemPercent 
       </select>
     </td>
     <td><input type="number" class="price" min="0" step="0.01" value="${price}"></td>
-    <td>
-      <input type="number" class="item-percent" min="-100" max="1000" step="0.1" value="${itemPercent}" 
-             placeholder="%" title="Add/subtract percentage to this item">
-    </td>
+    
     <td class="row-total">0.00</td>
     <td><button class="del">×</button></td>
   `;
@@ -285,13 +282,12 @@ function addRow(productName = "", qty = 1, unit = "Pcs", price = 0, itemPercent 
   const qtyInput = tr.querySelector(".qty");
   const unitSelect = tr.querySelector(".unit");
   const priceInput = tr.querySelector(".price");
-  const itemPercentInput = tr.querySelector(".item-percent");
+  
   const delBtn = tr.querySelector(".del");
   
   // Event listeners
   qtyInput.addEventListener("input", computeTotals);
   priceInput.addEventListener("input", computeTotals);
-  itemPercentInput.addEventListener("input", computeTotals);
   
   delBtn.addEventListener("click", () => {
     tr.remove();
@@ -329,19 +325,9 @@ function addRow(productName = "", qty = 1, unit = "Pcs", price = 0, itemPercent 
   priceInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      itemPercentInput.focus();
-      itemPercentInput.select();
-    }
-  });
-  
-  itemPercentInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      
       const hasData = productInput.value.trim() !== "" && 
                      parseFloat(qtyInput.value) > 0 && 
                      parseFloat(priceInput.value) > 0;
-      
       if (hasData) {
         addRow();
       } else {
@@ -386,7 +372,7 @@ function setActiveRow(tr) {
 }
 
 // ============================================
-// COMPUTE TOTALS - Enhanced with Item Percentage
+// COMPUTE TOTALS
 // ============================================
 function computeTotals() {
   let subTotal = 0;
@@ -394,16 +380,9 @@ function computeTotals() {
   tbody.querySelectorAll("tr").forEach(tr => {
     const qty = parseFloat(tr.querySelector(".qty").value) || 0;
     const price = parseFloat(tr.querySelector(".price").value) || 0;
-    const itemPercent = parseFloat(tr.querySelector(".item-percent").value) || 0;
     
-    // Calculate base amount
-    let rowTotal = qty * price;
-    
-    // Apply item percentage
-    if (itemPercent !== 0) {
-      const adjustment = (rowTotal * itemPercent) / 100;
-      rowTotal = rowTotal + adjustment;
-    }
+    // Calculate row amount
+    const rowTotal = qty * price;
     
     tr.querySelector(".row-total").textContent = rowTotal.toFixed(2);
     subTotal += rowTotal;
@@ -490,7 +469,7 @@ function setupEventListeners() {
   downloadBtn.addEventListener("click", downloadPDF);
   saveBtn.addEventListener("click", saveFinalBill);
   applyPercentBtn.addEventListener("click", applyPercentToAll);
-  discountPercentEl.addEventListener("input", onDiscountPercentChange);
+  // discountPercentEl.addEventListener("input", onDiscountPercentChange);
   discountRsEl.addEventListener("input", onDiscountRsChange);
   receivedEl.addEventListener("input", computeTotals);
 }
@@ -529,17 +508,8 @@ function applyPercentToAll() {
     const currentPrice = parseFloat(priceInput.value) || 0;
     
     if (currentPrice > 0) {
-      // Calculate new price with percentage
       const adjustment = (currentPrice * percentValue) / 100;
-      const newPrice = currentPrice + adjustment;
-      
-      // Update the price field with adjusted price
-      priceInput.value = newPrice.toFixed(2);
-      
-      // Reset percentage field to 0 (since we already applied it to price)
-      const itemPercentInput = tr.querySelector(".item-percent");
-      itemPercentInput.value = 0;
-      
+      priceInput.value = (currentPrice + adjustment).toFixed(2);
       updatedCount++;
     }
   });
@@ -561,7 +531,6 @@ function getBillData() {
       qty: parseFloat(tr.querySelector(".qty").value) || 0,
       unit: tr.querySelector(".unit").value,
       price: parseFloat(tr.querySelector(".price").value) || 0,
-      itemPercent: parseFloat(tr.querySelector(".item-percent").value) || 0,
       amount: parseFloat(tr.querySelector(".row-total").textContent) || 0
     });
   });
@@ -714,20 +683,15 @@ async function downloadPDF() {
     updateProgressModal(modal, 50, 'Preparing items table...');
     await delay(10);
     
-    // PDF table - show adjusted price as base price (customer view)
-    const tableData = billData.items.map((item, idx) => {
-      // Calculate adjusted price per unit (original price + percentage)
-      const adjustedPricePerUnit = item.qty > 0 ? (item.amount / item.qty) : item.price;
-      
-      return [
-        (idx + 1).toString(),
-        item.productName,
-        item.qty.toString(),
-        item.unit,
-        `Rs. ${adjustedPricePerUnit.toFixed(2)}`,
-        `Rs. ${item.amount.toFixed(2)}`
-      ];
-    });
+    // PDF table
+    const tableData = billData.items.map((item, idx) => [
+      (idx + 1).toString(),
+      item.productName,
+      item.qty.toString(),
+      item.unit,
+      `Rs. ${item.price.toFixed(2)}`,
+      `Rs. ${item.amount.toFixed(2)}`
+    ]);
     
     // Step 5: Generate table
     updateProgressModal(modal, 70, 'Generating table...');
@@ -1085,8 +1049,7 @@ function loadBillData(data) {
         item.productName || item.product || "",
         item.qty || 0,
         item.unit || "Pcs",
-        item.price || 0,
-        item.itemPercent || 0
+        item.price || 0
       );
     });
   }
