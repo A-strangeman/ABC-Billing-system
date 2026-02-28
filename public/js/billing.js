@@ -335,7 +335,46 @@ function addRow(productName = "", qty = 0, unit = "Pcs", price = 0) {
       }
     }
   });
+ // Replace the productInput "input" listener you just added with this:
+
+let priceHistoryTimeout;
+productInput.addEventListener("input", () => {
+  clearTimeout(priceHistoryTimeout);
+  const name = productInput.value.trim();
   
+  if (name.length < 3) {
+    priceSection.style.display = 'none';
+    return;
+  }
+
+  priceHistoryTimeout = setTimeout(async () => {
+    try {
+      const priceHistory = await API.getPriceHistory(name);
+
+      if (priceHistory && priceHistory.length > 0) {
+        priceRow.innerHTML = priceHistory.map(ph => `
+          <span class="chip price-chip" data-price="${ph.price}">
+            ₹${ph.price} (${new Date(ph.date).toLocaleDateString()})
+          </span>
+        `).join('');
+
+        priceSection.style.display = 'block';
+
+        priceRow.querySelectorAll('.price-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            activeRow.querySelector('.price').value = chip.dataset.price;
+            computeTotals();
+          });
+        });
+      } else {
+        priceSection.style.display = 'none';
+      }
+    } catch (error) {
+      priceSection.style.display = 'none';
+    }
+  }, 400); // waits 400ms after you stop typing
+});
+
   productInput.addEventListener("blur", () => {
     handlePlyCalculation(productInput, qtyInput, unitSelect);
   });
