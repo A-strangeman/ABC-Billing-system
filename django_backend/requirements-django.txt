@@ -1,0 +1,8 @@
+Django==6.0.4
+djangorestframework==3.17.1
+django-cors-headers==4.9.0
+python-dotenv==1.2.2
+psycopg[binary]==3.3.3
+PyJWT==2.12.1
+google-auth==2.40.3
+django-redis==6.0.0

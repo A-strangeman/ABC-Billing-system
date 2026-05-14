@@ -5,30 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome - ABC Company</title>
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/base-layout.js" defer></script>
 </head>
-<body>
-  <div class="dashboard">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="company-title">ABC Company</h2>
-      <ul class="menu">
-        <li class="active"><a href="welcome.html">🏠 Dashboard</a></li>
-        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
-        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
-        <li><a href="reports.html">📊 Reports</a></li>
-        <li><a href="admin-catalog.html">⚙️ Manage Catalog</a></li>
-      </ul>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="content">
-      <header>
-        <h1>Welcome to ABC Company</h1>
-        <button id="logoutBtn" class="btn-logout" onclick="handleLogout()">Logout</button>
-      </header>
-      
+<body data-use-base-layout="true" data-page-key="welcome" data-header-title="Welcome to ABC Company" data-header-action-id="logoutBtn" data-header-action-label="Logout" data-header-action-class="btn-logout">
+  <template id="page-content-template">
       <section class="welcome-grid">
-        <!-- Quick Stats -->
         <div class="stat-card">
           <h3>Today's Bills</h3>
           <p class="stat-number" id="todayBills">0</p>
@@ -50,7 +31,6 @@
         </div>
       </section>
 
-      <!-- Recent Drafts -->
       <section class="info-section">
         <h2>📝 Recent Drafts</h2>
         <div id="draftsList" class="list-container">
@@ -58,16 +38,15 @@
         </div>
       </section>
 
-      <!-- Recent Bills -->
       <section class="info-section">
         <h2>📋 Recent Bills</h2>
         <div id="billsList" class="list-container">
           <p class="loading">Loading bills...</p>
         </div>
       </section>
-    </main>
-  </div>
+  </template>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <script src="../js/api.js"></script>
@@ -76,149 +55,6 @@
   <script src="../js/auth-guard.js"></script>
   <script src="../js/pdf-generator.js"></script>
   <script src="../js/router.js"></script>
-  <script>
-    // ============================================
-    // LOGOUT FUNCTION
-    // ============================================
-    function handleLogout() {
-      console.log("🔴 Logout button clicked");
-      
-      if (confirm('Are you sure you want to logout?')) {
-        console.log("👋 Logging out...");
-        
-        // Clear all stored authentication data
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userRole');
-        sessionStorage.clear();
-        
-        // Redirect to login page (multiple approaches for reliability)
-        console.log("📍 Current location:", window.location.href);
-        console.log("📍 Redirecting to index.html");
-        
-        // Try different redirect methods
-        window.location.href = '../index.html';
-        
-        // Backup: Force redirect after 100ms if first attempt fails
-        setTimeout(() => {
-          if (window.location.pathname.includes('welcome.html')) {
-            window.location.replace('../index.html');
-          }
-        }, 100);
-      }
-    }
-
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-    
-    // Get bill total with fallback for different field names
-    function getBillTotal(bill) {
-      return bill.total || bill.grandTotal || bill.totalAmount || 0;
-    }
-
-    // ============================================
-    // LOAD DASHBOARD DATA
-    // ============================================
-    async function loadDashboard() {
-      try {
-        console.log("📊 Loading dashboard data...");
-
-        // Load drafts
-        const drafts = await API.getAllDrafts();
-        console.log("📝 Drafts loaded:", drafts);
-        document.getElementById('draftCount').textContent = drafts.length;
-        
-        const draftsList = document.getElementById('draftsList');
-        if (drafts.length === 0) {
-          draftsList.innerHTML = '<p class="empty">No drafts saved</p>';
-        } else {
-          draftsList.innerHTML = drafts.slice(0, 3).map(draft => `
-            <div class="list-item" onclick="editDraft('${draft._id}')">
-              <strong>Draft ${draft.estimateNo || 'Untitled'}</strong>
-              <span>${draft.customer?.name || 'No customer'}</span>
-              <span class="date">${new Date(draft.createdAt || draft.savedAt).toLocaleDateString()}</span>
-            </div>
-          `).join('');
-        }
-        
-        // Load recent bills
-        const billsResponse = await API.getBills(1, 20);
-        console.log("📋 Bills response:", billsResponse);
-        
-        // Handle different response formats
-        let bills = [];
-        if (Array.isArray(billsResponse)) {
-          bills = billsResponse;
-        } else if (billsResponse.bills && Array.isArray(billsResponse.bills)) {
-          bills = billsResponse.bills;
-        } else if (billsResponse.data && Array.isArray(billsResponse.data)) {
-          bills = billsResponse.data;
-        }
-        
-        console.log("✅ Bills array:", bills);
-        
-        const billsList = document.getElementById('billsList');
-        if (bills.length === 0) {
-          billsList.innerHTML = '<p class="empty">No bills yet</p>';
-        } else {
-          billsList.innerHTML = bills.slice(0, 5).map(bill => `
-            <div class="list-item" onclick="viewBill('${bill._id}')">
-              <strong>Bill #${bill.estimateNo}</strong>
-              <span>${bill.customer?.name || 'Unknown'}</span>
-              <span class="amount">₹${getBillTotal(bill).toFixed(2)}</span>
-            </div>
-          `).join('');
-        }
-        
-        // Calculate stats
-        const today = new Date().toISOString().split('T')[0];
-        const todayBills = bills.filter(b => b.date === today);
-        document.getElementById('todayBills').textContent = todayBills.length;
-        
-        const thisMonth = new Date().getMonth();
-        const thisYear = new Date().getFullYear();
-        const monthBills = bills.filter(b => {
-          const billDate = new Date(b.date || b.createdAt);
-          return billDate.getMonth() === thisMonth && billDate.getFullYear() === thisYear;
-        });
-        document.getElementById('monthBills').textContent = monthBills.length;
-        
-        // Calculate total revenue
-        const totalRevenue = bills.reduce((sum, b) => sum + getBillTotal(b), 0);
-        document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
-        
-        console.log("✅ Dashboard loaded successfully");
-        
-      } catch (error) {
-        console.error('❌ Error loading dashboard:', error);
-        document.getElementById('draftsList').innerHTML = '<p class="empty" style="color: red;">Error loading drafts</p>';
-        document.getElementById('billsList').innerHTML = '<p class="empty" style="color: red;">Error loading bills</p>';
-      }
-    }
-    
-    // ============================================
-    // NAVIGATION FUNCTIONS
-    // ============================================
-    
-    function editDraft(draftId) {
-      console.log("Editing draft:", draftId);
-      sessionStorage.setItem('editDraftId', draftId);
-      window.location.href = 'make-bill.html';
-    }
-    
-    function viewBill(billId) {
-      console.log("Viewing bill:", billId);
-      sessionStorage.setItem('viewBillId', billId);
-      window.location.href = 'edit-bill.html';
-    }
-    
-    // ============================================
-    // INITIALIZE
-    // ============================================
-    
-    // Load on page ready
-    document.addEventListener('DOMContentLoaded', loadDashboard);
-  </script>
+  <script src="../js/welcome-page.js"></script>
 </body>
 </html>

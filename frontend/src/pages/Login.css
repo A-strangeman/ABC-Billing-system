@@ -1,0 +1,265 @@
+@keyframes toast-in {
+  0% { transform: translateX(120%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.login-page {
+  --bg-page: #fdf5f5;
+  --shell-bg: #ffffff;
+  --shell-border: #f5e6e6;
+
+  --side-bg: #162030;
+  --side-title: #ffffff;
+  --side-muted: #9ca3af;
+  --side-foot: #5a7080;
+
+  --accent: #e24b4a;
+  --accent-hover: #c0392b;
+  --on-accent: #ffffff;
+
+  --pane-bg: #ffffff;
+  --heading: #1a1a1a;
+  --muted: #888888;
+  --label: #555555;
+  --input-bg: #fdf2f2;
+  --input-border: #f5c6c6;
+  --input-text: #1a1a1a;
+
+  --tab-border: #f5e6e6;
+  --tab-inactive: #888888;
+
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.28);
+  --error-text: #b91c1c;
+
+  --toast-bg: #ffffff;
+  --toast-border: #f5e6e6;
+  --toast-text: #1f2937;
+
+  --guide-overlay: rgba(10, 16, 26, 0.52);
+  --guide-panel-bg: #ffffff;
+  --guide-panel-border: #f5e6e6;
+  --guide-title: #1a1a1a;
+  --guide-muted: #666666;
+  --guide-step-bg: #fdf2f2;
+  --guide-step-border: #f5e6e6;
+  --guide-step-text: #374151;
+  --guide-ghost-bg: #ffffff;
+  --guide-ghost-border: #f5c6c6;
+  --guide-ghost-text: #c0392b;
+  --guide-primary-bg: #e24b4a;
+  --guide-primary-hover: #c0392b;
+  --guide-primary-text: #ffffff;
+
+  background: var(--bg-page);
+}
+
+html[data-theme='dark'] .login-page {
+  --bg-page: #162030;
+  --shell-bg: #1e2a3a;
+  --shell-border: #253548;
+
+  --side-bg: #1e2a3a;
+  --side-title: #e5e7eb;
+  --side-muted: #8fa3b8;
+  --side-foot: #5a7080;
+
+  --accent: #e8344a;
+  --accent-hover: #c0392b;
+  --on-accent: #ffffff;
+
+  --pane-bg: #1e2a3a;
+  --heading: #cdd5e0;
+  --muted: #8fa3b8;
+  --label: #8fa3b8;
+  --input-bg: #253548;
+  --input-border: #2e4060;
+  --input-text: #cdd5e0;
+
+  --tab-border: #253548;
+  --tab-inactive: #8fa3b8;
+
+  --error-bg: rgba(248, 113, 113, 0.12);
+  --error-border: rgba(248, 113, 113, 0.35);
+  --error-text: #fca5a5;
+
+  --toast-bg: #1e2a3a;
+  --toast-border: #253548;
+  --toast-text: #cdd5e0;
+
+  --guide-overlay: rgba(2, 8, 18, 0.7);
+  --guide-panel-bg: #1e2a3a;
+  --guide-panel-border: #2e4060;
+  --guide-title: #cdd5e0;
+  --guide-muted: #8fa3b8;
+  --guide-step-bg: #253548;
+  --guide-step-border: #2e4060;
+  --guide-step-text: #cdd5e0;
+  --guide-ghost-bg: #253548;
+  --guide-ghost-border: #2e4060;
+  --guide-ghost-text: #cdd5e0;
+  --guide-primary-bg: #e8344a;
+  --guide-primary-hover: #c0392b;
+  --guide-primary-text: #ffffff;
+}
+
+.login-shell {
+  background: var(--shell-bg);
+  border: 1px solid var(--shell-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+.login-side {
+  background: var(--side-bg);
+}
+
+.login-brand-badge,
+.login-feature-dot,
+.login-toast-dot {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.login-side-title,
+.login-feature-title {
+  color: var(--side-title);
+}
+
+.login-side-muted {
+  color: var(--side-muted);
+}
+
+.login-side-foot {
+  color: var(--side-foot);
+}
+
+.login-accent,
+.login-link {
+  color: var(--accent);
+}
+
+.login-form-pane {
+  background: var(--pane-bg);
+}
+
+.login-heading {
+  color: var(--heading);
+}
+
+.login-muted,
+.login-label-muted,
+.login-eye-btn,
+.login-eye-btn svg {
+  color: var(--muted);
+  stroke: currentColor;
+}
+
+.login-tabs {
+  border-color: var(--tab-border);
+}
+
+.login-tab-active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.login-tab-inactive {
+  color: var(--tab-inactive);
+  border-color: transparent;
+}
+
+.login-error {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+}
+
+.login-check {
+  accent-color: var(--accent);
+}
+
+.login-btn {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.login-btn:hover {
+  background: var(--accent-hover);
+}
+
+.login-input {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+.login-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.login-eye-btn:hover,
+.login-link:hover {
+  color: var(--accent-hover);
+}
+
+.login-feature {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.login-toast {
+  background: var(--toast-bg);
+  border: 1px solid var(--toast-border);
+  color: var(--toast-text);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.login-guide-overlay {
+  background: var(--guide-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.login-guide-panel {
+  background: var(--guide-panel-bg);
+  border: 1px solid var(--guide-panel-border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-guide-title {
+  color: var(--guide-title);
+}
+
+.login-guide-muted {
+  color: var(--guide-muted);
+}
+
+.login-guide-step {
+  background: var(--guide-step-bg);
+  border: 1px solid var(--guide-step-border);
+  color: var(--guide-step-text);
+}
+
+.login-guide-btn {
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.login-guide-btn-ghost {
+  background: var(--guide-ghost-bg);
+  border-color: var(--guide-ghost-border);
+  color: var(--guide-ghost-text);
+}
+
+.login-guide-btn-primary {
+  background: var(--guide-primary-bg);
+  color: var(--guide-primary-text);
+}
+
+.login-guide-btn-primary:hover {
+  background: var(--guide-primary-hover);
+}

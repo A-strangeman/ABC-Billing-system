@@ -3,7 +3,7 @@
 (async function checkAuth() {
   // Determine API base URL dynamically
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api'
+    ? 'http://localhost:8000/api'
     : window.location.origin + '/api';
   
   const token = localStorage.getItem('authToken');
@@ -31,6 +31,7 @@
         method: 'GET',
         credentials: 'include', // ✅ IMPORTANT: Include cookies
         headers: { 
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -64,6 +65,7 @@
         method: 'GET',
         credentials: 'include', // ✅ IMPORTANT: Include cookies
         headers: { 
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -111,7 +113,7 @@ window.logout = async function() {
     
     // Determine API base URL
     const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:5000/api'
+      ? 'http://localhost:8000/api'
       : window.location.origin + '/api';
     
     try {

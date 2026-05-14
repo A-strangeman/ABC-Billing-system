@@ -373,6 +373,10 @@ function hideLoadingState() {
 // SETUP EVENT LISTENERS
 // ============================================
 function setupEventListeners() {
+  document.getElementById('printBtn')?.addEventListener('click', () => {
+    window.print();
+  });
+
   document.getElementById('applyFilter')?.addEventListener('click', loadReportsData);
   
   document.getElementById('resetFilter')?.addEventListener('click', () => {

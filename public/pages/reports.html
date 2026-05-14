@@ -6,26 +6,10 @@
   <title>Reports - ABC Company</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/reports.css">
+  <script src="../js/base-layout.js" defer></script>
 </head>
-<body>
-  <div class="dashboard">
-    <aside class="sidebar">
-      <h2 class="company-title">ABC Company</h2>
-      <ul class="menu">
-        <li><a href="welcome.html">🏠 Dashboard</a></li>
-        <li><a href="make-bill.html">📝 Make a New Bill</a></li>
-        <li><a href="edit-bill.html">✏️ Edit Bills</a></li>
-        <li class="active"><a href="reports.html">📊 Reports</a></li>
-      </ul>
-    </aside>
-
-    <main class="content">
-      <header>
-        <h1>📊 Business Reports</h1>
-        <button onclick="window.print()" class="btn-print">🖨️ Print Report</button>
-      </header>
-
-      <!-- Filter Section -->
+<body data-use-base-layout="true" data-page-key="reports" data-header-title="📊 Business Reports" data-header-action-id="printBtn" data-header-action-label="🖨️ Print Report" data-header-action-class="btn-print">
+  <template id="page-content-template">
       <section class="filter-section">
         <h3>📅 Date Range</h3>
         <div class="filter-controls">
@@ -49,7 +33,6 @@
         </div>
       </section>
 
-      <!-- Key Metrics Cards -->
       <section class="metrics-grid">
         <div class="metric-card">
           <div class="metric-icon">💰</div>
@@ -106,7 +89,6 @@
         </div>
       </section>
 
-      <!-- Charts Section -->
       <section class="charts-section">
         <div class="chart-container">
           <h3>📈 Revenue Trend</h3>
@@ -131,7 +113,6 @@
         </div>
       </section>
 
-      <!-- Detailed Tables -->
       <section class="tables-section">
         <div class="table-container">
           <h3>📋 Recent Bills</h3>
@@ -173,7 +154,6 @@
         </div>
       </section>
 
-      <!-- Export Options -->
       <section class="export-section">
         <h3>📥 Export Reports</h3>
         <div class="export-buttons">
@@ -182,10 +162,8 @@
           <button id="exportCSV" class="btn-export">📋 Export as CSV</button>
         </div>
       </section>
-    </main>
-  </div>
+  </template>
 
-  <!-- ✅ FIXED: Correct script loading order -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" 
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -193,7 +171,6 @@
   <script src="../js/api.js"></script>
   <script src="../js/store.js"></script>
   <script src="../js/auth-guard.js"></script>
-  <!-- ✅ THIS WAS MISSING - THE ROOT CAUSE! -->
   <script src="../js/reports.js"></script>
 </body>
 </html>

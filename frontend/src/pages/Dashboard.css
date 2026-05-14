@@ -1,0 +1,256 @@
+@keyframes dashboard-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-page {
+  --bg-page: #fdf5f5;
+
+  --sidebar-bg: #c0392b;
+  --sidebar-title-color: #ffffff;
+  --sidebar-item-color: rgba(255, 255, 255, 0.65);
+  --sidebar-active-bg: rgba(255, 255, 255, 0.18);
+  --sidebar-active-color: #ffffff;
+
+  --topbar-bg: #ffffff;
+  --topbar-border: #f5e6e6;
+  --welcome-text: #c0392b;
+
+  --card-bg: #ffffff;
+  --card-border: #eeeeee;
+  --card-bottom-border: #c0392b;
+  --card-label-color: #aaaaaa;
+  --card-value-color: #c0392b;
+
+  --bill-row-bg: #ffffff;
+  --bill-row-left-border: #c0392b;
+  --bill-id-color: #c0392b;
+  --bill-name-color: #777777;
+  --bill-amount-color: #1a1a1a;
+  --bill-date-color: #aaaaaa;
+
+  --drafts-bg: #ffffff;
+  --drafts-border: #eeeeee;
+  --drafts-empty-color: #bbbbbb;
+
+  --section-heading-color: #1a1a1a;
+
+  --toggle-bg: #1a1a1a;
+  --toggle-color: #ffffff;
+
+  background: var(--bg-page);
+}
+
+html[data-theme='dark'] .dashboard-page {
+  --bg-page: #162030;
+
+  --sidebar-bg: #1e2a3a;
+  --sidebar-title-color: #e8344a;
+  --sidebar-item-color: #8fa3b8;
+  --sidebar-active-bg: #253548;
+  --sidebar-active-color: #ffffff;
+
+  --topbar-bg: #1e2a3a;
+  --topbar-border: #253548;
+  --welcome-text: #e8344a;
+
+  --card-bg: #1e2a3a;
+  --card-border: #253548;
+  --card-bottom-border: #e8344a;
+  --card-label-color: #5a7080;
+  --card-value-color: #e8344a;
+
+  --bill-row-bg: #1e2a3a;
+  --bill-row-left-border: #e8344a;
+  --bill-id-color: #e8344a;
+  --bill-name-color: #5a7080;
+  --bill-amount-color: #cdd5e0;
+  --bill-date-color: #3d5060;
+
+  --drafts-bg: #1e2a3a;
+  --drafts-border: #253548;
+  --drafts-empty-color: #3d5060;
+
+  --section-heading-color: #cdd5e0;
+
+  --toggle-bg: #ffffff;
+  --toggle-color: #162030;
+}
+
+.dashboard-sidebar {
+  background: var(--sidebar-bg);
+}
+
+.dashboard-sidebar-title {
+  color: var(--sidebar-title-color);
+}
+
+.dashboard-nav-item {
+  color: var(--sidebar-item-color);
+}
+
+.dashboard-nav-item:hover {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-color);
+}
+
+.dashboard-nav-item-active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-color);
+}
+
+.dashboard-topbar {
+  background: var(--topbar-bg) !important;
+  border: 1px solid var(--topbar-border);
+}
+
+.dashboard-welcome {
+  color: var(--welcome-text);
+}
+
+.dashboard-profile-btn {
+  background: var(--topbar-bg);
+  border: 1px solid var(--topbar-border);
+  color: var(--welcome-text);
+}
+
+.dashboard-profile-btn:hover {
+  filter: brightness(0.98);
+}
+
+.dashboard-logout-btn {
+  background: var(--toggle-bg) !important;
+  color: var(--toggle-color) !important;
+}
+
+.dashboard-topbar .dark-panel {
+  background: transparent !important;
+  border-color: var(--topbar-border);
+}
+
+.dashboard-topbar .dark-panel button,
+.dashboard-topbar .dark-panel button.bg-slate-900 {
+  color: var(--toggle-color) !important;
+}
+
+.dashboard-topbar .dark-panel button.bg-slate-900 {
+  background: var(--toggle-bg) !important;
+  border: 1px solid var(--topbar-border);
+}
+
+html[data-theme='dark'] .dashboard-topbar .dark-panel button.bg-slate-900 {
+  box-shadow: 0 0 0 1px rgba(22, 32, 48, 0.12);
+}
+
+.dashboard-stat-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border);
+  border-bottom: 2px solid var(--card-bottom-border);
+}
+
+.dashboard-stat-label {
+  color: var(--card-label-color);
+}
+
+.dashboard-stat-value {
+  color: var(--card-value-color);
+}
+
+.dashboard-section {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border);
+}
+
+.dashboard-drafts-panel {
+  background: var(--drafts-bg) !important;
+  border-color: var(--drafts-border);
+}
+
+.dashboard-section-heading {
+  color: var(--section-heading-color) !important;
+}
+
+.dashboard-drafts-empty {
+  color: var(--drafts-empty-color) !important;
+}
+
+.dashboard-draft-row {
+  background: var(--bill-row-bg) !important;
+  border: 1px solid var(--drafts-border);
+}
+
+.dashboard-draft-id {
+  color: var(--bill-id-color);
+}
+
+.dashboard-draft-name {
+  color: var(--bill-name-color);
+}
+
+.dashboard-draft-date {
+  color: var(--bill-date-color);
+}
+
+.dashboard-draft-delete {
+  border: 1px solid color-mix(in srgb, var(--bill-id-color) 35%, transparent);
+  background: color-mix(in srgb, var(--bill-id-color) 10%, transparent);
+  color: var(--bill-id-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dashboard-draft-delete:hover {
+  background: color-mix(in srgb, var(--bill-id-color) 16%, transparent);
+}
+
+.dashboard-bill-row {
+  background: var(--bill-row-bg) !important;
+  border-left: 3px solid var(--bill-row-left-border);
+  border-top: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.dashboard-bill-id {
+  color: var(--bill-id-color);
+}
+
+.dashboard-bill-name {
+  color: var(--bill-name-color);
+}
+
+.dashboard-bill-amount {
+  color: var(--bill-amount-color);
+}
+
+.dashboard-bill-date {
+  color: var(--bill-date-color);
+}
+
+.dashboard-modal {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+
+.dashboard-modal-title {
+  color: var(--heading-color, var(--section-heading-color));
+}
+
+.dashboard-modal-text {
+  color: var(--bill-name-color);
+}
+
+.dashboard-main-scroll,
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dashboard-main-scroll::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

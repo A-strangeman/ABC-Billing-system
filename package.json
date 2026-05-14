@@ -1,27 +1,17 @@
 {
   "name": "billing-system",
   "version": "1.0.0",
-  "main": "backend/server.js",
+  "private": true,
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
-    "vercel-build": "echo 'Build complete'"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "compression": "^1.7.4",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-validator": "^7.0.1",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.0",
-    "node-cache": "^5.1.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "dev": "npm --prefix frontend run dev",
+    "dev:django": ".\\.venv\\Scripts\\python.exe django_backend\\manage.py runserver",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "check": "npm run lint && npm run build",
+    "start": "npm run dev",
+    "vercel-build": "npm --prefix frontend install --no-audit --no-fund && npm --prefix frontend run build"
   },
   "engines": {
     "node": "20.x"

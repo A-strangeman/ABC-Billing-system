@@ -1,0 +1,118 @@
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.admin-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.admin-section h3 {
+  color: #ff6363;
+  margin-bottom: 15px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.form-row button {
+  padding: 8px 16px;
+  background: #ff6363;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.form-row button:hover {
+  background: #ff4545;
+}
+
+.form-row button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.item-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.item-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f1f3;
+  padding: 6px 12px;
+  margin: 4px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+}
+
+.item-chip button {
+  margin-left: 8px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.item-chip button:hover {
+  background: #d32f2f;
+}
+
+.loading-msg {
+  color: #999;
+  font-style: italic;
+  padding: 10px;
+}
+
+.error-msg {
+  color: #f44336;
+  padding: 10px;
+}
+
+.success-msg {
+  color: #4caf50;
+  padding: 10px;
+  margin-top: 10px;
+  display: none;
+}
+
+.success-msg.show {
+  display: block;
+}
+
+.cache-warning {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+.cache-warning strong {
+  color: #856404;
+}

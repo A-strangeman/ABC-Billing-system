@@ -1,0 +1,650 @@
+.billing-page {
+  --bg-page: #fff8f8;
+  --bg-card: #ffffff;
+  --bg-input: #fdf2f2;
+
+  --border-input: #f5c6c6;
+  --border-divider: #f5e6e6;
+
+  --header-bg: #c0392b;
+  --header-text: #ffffff;
+
+  --table-head-bg: #fdf2f2;
+  --table-head-text: #c0392b;
+  --table-head-border: #c0392b;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+
+  --accent: #c0392b;
+  --accent-hover: #a93226;
+
+  --btn-bg: #c0392b;
+  --btn-text: #ffffff;
+  --btn-hover: #a93226;
+
+  --btn-final-bg: #27ae60;
+  --btn-final-text: #ffffff;
+
+  --pill-bg: #fdf2f2;
+  --pill-border: #f5c6c6;
+  --pill-text: #c0392b;
+  --pill-hover-bg: #c0392b;
+  --pill-hover-text: #ffffff;
+
+  --selection-bg: #ff6363;
+  --selection-text: #ffffff;
+  --highlight-text: #2563eb;
+
+  --sidebar-bg: #fff8f8;
+  --sidebar-border: #f5e6e6;
+
+  font-family: 'Segoe UI Variable', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-style: normal;
+  line-height: 1.4;
+
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+html[data-theme='dark'] .billing-page {
+  --bg-page: #162030;
+  --bg-card: #1e2a3a;
+  --bg-input: #253548;
+
+  --border-input: #2e4060;
+  --border-divider: #253548;
+
+  --header-bg: #e8344a;
+  --header-text: #ffffff;
+
+  --table-head-bg: #e8344a;
+  --table-head-text: #ffffff;
+  --table-head-border: #e8344a;
+
+  --text-primary: #cdd5e0;
+  --text-secondary: #8fa3b8;
+  --text-muted: #5a7080;
+
+  --accent: #ff7a87;
+  --accent-hover: #c0392b;
+
+  --btn-bg: #e8344a;
+  --btn-text: #ffffff;
+  --btn-hover: #c0392b;
+
+  --btn-final-bg: #1d6b45;
+  --btn-final-text: #ffffff;
+
+  --pill-bg: #1e2a3a;
+  --pill-border: #2e4060;
+  --pill-text: #8fa3b8;
+  --pill-hover-bg: #e8344a;
+  --pill-hover-text: #ffffff;
+
+  --selection-bg: #e8344a;
+  --selection-text: #ffffff;
+  --highlight-text: #93c5fd;
+
+  --sidebar-bg: #162030;
+  --sidebar-border: #1e2a3a;
+
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.billing-topbar {
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.billing-topbar-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.billing-topbar-title:hover {
+  text-decoration: underline;
+}
+
+.billing-topbar-title:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.billing-topbar-actions .dark-panel {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.billing-topbar-actions .dark-panel button {
+  color: #ffffff;
+}
+
+.billing-topbar-actions .dark-panel button.bg-slate-900 {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+html[data-theme='dark'] .billing-topbar-actions .dark-panel button.bg-slate-900 {
+  background: #ffffff !important;
+  color: #162030 !important;
+  border-color: #ffffff;
+}
+
+.billing-icon-btn {
+  height: 36px;
+  width: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  background: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.billing-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.billing-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-divider) !important;
+}
+
+.billing-sidebar {
+  background: var(--sidebar-bg) !important;
+  border: 1px solid var(--sidebar-border) !important;
+}
+
+.billing-sidebar-tip {
+  background: var(--bg-input);
+  border-left-color: var(--accent);
+  color: var(--text-secondary);
+}
+
+.billing-title {
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.billing-table-wrap {
+  border: 1px solid var(--table-head-border);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.billing-table-head {
+  background: var(--table-head-bg);
+  color: var(--table-head-text);
+  border-bottom: 2px solid var(--table-head-border);
+}
+
+.billing-table-head th {
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.billing-row-active {
+  background: var(--bg-input);
+  outline: 1px solid var(--accent);
+}
+
+.billing-input {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text-primary) !important;
+  font-style: normal;
+  letter-spacing: 0.01em;
+}
+
+.billing-input::placeholder {
+  color: var(--text-muted);
+}
+
+.billing-input-readonly {
+  background: var(--bg-card) !important;
+}
+
+.billing-select option {
+  color: #111;
+}
+
+.billing-label {
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.billing-label-amount {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.billing-words-input {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-style: normal;
+}
+
+.billing-text-accent,
+.billing-amount {
+  color: var(--accent) !important;
+}
+
+.billing-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.billing-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.billing-delete-btn {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+.billing-delete-btn:hover {
+  background: var(--btn-hover);
+}
+
+.billing-btn {
+  color: var(--btn-text);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.billing-btn-primary {
+  background: var(--btn-bg);
+}
+
+.billing-btn-primary:hover {
+  background: var(--btn-hover);
+}
+
+.billing-btn-final {
+  background: var(--btn-final-bg);
+  color: var(--btn-final-text);
+}
+
+.billing-btn-wa {
+  background: #1d6b45;
+  color: #ffffff;
+}
+
+.billing-btn-wa:hover {
+  filter: brightness(0.95);
+}
+
+.billing-btn-wa:disabled {
+  filter: none;
+}
+
+.billing-btn-final:hover {
+  filter: brightness(0.95);
+}
+
+.billing-btn-ghost {
+  background: var(--btn-bg);
+}
+
+.billing-btn-ghost:hover {
+  background: var(--btn-hover);
+}
+
+.billing-language-wrap {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+}
+
+.billing-language-label {
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.billing-language-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.billing-language-select:focus {
+  border-color: var(--accent);
+}
+
+.billing-selection ::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+.billing-focus-accent:focus {
+  border-color: var(--accent) !important;
+}
+
+.billing-text-highlight {
+  color: var(--highlight-text) !important;
+}
+
+html[data-theme='dark'] .billing-btn-ghost {
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+}
+
+html[data-theme='dark'] .billing-btn-ghost:hover {
+  background: var(--bg-card);
+}
+
+html[data-theme='dark'] .billing-btn-wa {
+  background: #1d6b45;
+  color: #ffffff;
+}
+
+.billing-pill-title {
+  color: var(--text-muted);
+  border-color: var(--border-divider);
+}
+
+.billing-pill {
+  background: var(--pill-bg);
+  border-color: var(--pill-border);
+  color: var(--pill-text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.billing-pill:hover,
+.billing-pill-active {
+  background: var(--pill-hover-bg);
+  border-color: var(--pill-hover-bg);
+  color: var(--pill-hover-text);
+}
+
+.billing-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 18px;
+  z-index: 90;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.billing-toast-success {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.36);
+  color: #14532d;
+}
+
+.billing-toast-error {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.36);
+  color: #7f1d1d;
+}
+
+.billing-toast-warning {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.38);
+  color: #78350f;
+}
+
+.billing-toast-info {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: rgba(59, 130, 246, 0.36);
+  color: #1e3a8a;
+}
+
+html[data-theme='dark'] .billing-toast-success {
+  color: #86efac;
+}
+
+html[data-theme='dark'] .billing-toast-error {
+  color: #fca5a5;
+}
+
+html[data-theme='dark'] .billing-toast-warning {
+  color: #fcd34d;
+}
+
+html[data-theme='dark'] .billing-toast-info {
+  color: #93c5fd;
+}
+
+.billing-sidebar-tip {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  font-style: normal;
+}
+
+.billing-download-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(10, 15, 25, 0.1);
+  backdrop-filter: blur(1.5px);
+  animation: billing-overlay-fade 0.14s ease-out;
+}
+
+.billing-download-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.34);
+  background: rgba(255, 255, 255, 0.94);
+  color: #1e3a8a;
+  font-size: 12.5px;
+  font-weight: 700;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+  animation: billing-indicator-rise 0.2s ease-out;
+}
+
+.billing-download-indicator.is-success {
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #14532d;
+  animation: billing-success-pop 0.28s ease-out;
+}
+
+.billing-download-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.billing-download-icon.is-success {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.billing-download-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(59, 130, 246, 0.25);
+  border-top-color: #2563eb;
+  animation: billing-spin-fast 0.75s linear infinite;
+}
+
+.billing-download-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.billing-download-progress::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 35%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  animation: billing-progress-slide 0.9s ease-in-out infinite;
+}
+
+.billing-download-dots i {
+  font-style: normal;
+  opacity: 0.25;
+  animation: billing-dot-pulse 1s ease-in-out infinite;
+}
+
+.billing-download-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.billing-download-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes billing-spin-fast {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes billing-overlay-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes billing-indicator-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes billing-success-pop {
+  0% {
+    transform: scale(0.96);
+  }
+  55% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes billing-progress-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(340%);
+  }
+}
+
+@keyframes billing-dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+html[data-theme='dark'] .billing-download-indicator {
+  background: rgba(22, 32, 48, 0.94);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #c7ddff;
+}
+
+html[data-theme='dark'] .billing-download-indicator.is-success {
+  border-color: rgba(74, 222, 128, 0.45);
+  color: #bbf7d0;
+}
+
+html[data-theme='dark'] .billing-download-icon.is-success {
+  background: rgba(34, 197, 94, 0.24);
+  color: #86efac;
+}
+
+html[data-theme='dark'] .billing-download-overlay {
+  background: rgba(4, 8, 14, 0.28);
+}
+
+.billing-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.billing-modal {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.billing-modal-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.billing-modal-body {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.billing-modal-items {
+  font-weight: bold;
+  color: #b45309;
+  margin-top: 0.5rem;
+}
+.billing-modal-actions button {
+  min-width: 120px;
+}

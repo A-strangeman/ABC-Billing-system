@@ -1,0 +1,27 @@
+# Billing System Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /terms
+Allow: /privacy
+Allow: /help
+Allow: /price-list
+
+# Disallow protected routes
+Disallow: /dashboard
+Disallow: /billing
+Disallow: /edit-bills
+Disallow: /reports
+Disallow: /admin
+Disallow: /profile
+Disallow: /verify-otp
+Disallow: /forgot-password
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl delay (optional - adjust as needed)
+Crawl-delay: 1

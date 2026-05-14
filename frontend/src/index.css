@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html[data-theme-transition='true'] *,
+html[data-theme-transition='true'] *::before,
+html[data-theme-transition='true'] *::after {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+}
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-secondary: #334155;
+  --color-success: #16a34a;
+  --color-info: #0284c7;
+  --color-background: #eef3ff;
+  --color-card: #ffffff;
+  --color-text-main: #0f172a;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html[data-theme='dark'] body {
+  --color-background: #0f172a;
+  --color-card: #111827;
+  --color-text-main: #e5e7eb;
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+}
+
+html[data-theme='dark'] [class*='bg-white'] {
+  background-color: #111827 !important;
+}
+
+html[data-theme='dark'] [class*='bg-[#f7f7f9]'],
+html[data-theme='dark'] [class*='bg-[#F9FAFB]'],
+html[data-theme='dark'] [class*='bg-[#f0f2f5]'],
+html[data-theme='dark'] [class*='bg-gray-50'] {
+  background-color: #0f172a !important;
+}
+
+html[data-theme='dark'] [class*='text-[#111827]'],
+html[data-theme='dark'] [class*='text-gray-800'],
+html[data-theme='dark'] [class*='text-gray-700'],
+html[data-theme='dark'] [class*='text-gray-600'],
+html[data-theme='dark'] [class*='text-gray-500'],
+html[data-theme='dark'] [class*='text-gray-400'],
+html[data-theme='dark'] [class*='text-[#4B5563]'],
+html[data-theme='dark'] [class*='text-[#6B7280]'],
+html[data-theme='dark'] [class*='text-[#9CA3AF]'] {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme='dark'] [class*='border-[#E5E7EB]'],
+html[data-theme='dark'] [class*='border-[#D1D5DB]'],
+html[data-theme='dark'] [class*='border-gray-100'],
+html[data-theme='dark'] [class*='border-gray-200'],
+html[data-theme='dark'] [class*='border-gray-50'] {
+  border-color: #334155 !important;
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea {
+  background-color: #0b1220;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+html[data-theme='dark'] .dark-panel {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+html[data-theme='dark'] .dark-panel button {
+  color: #e2e8f0;
+}
+
+html[data-theme='dark'] .dark-panel button:hover {
+  background: rgba(51, 65, 85, 0.55);
+}
+
+html[data-theme='dark'] .dark-panel button.bg-slate-900 {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* Base Form Styling */
+input, select, textarea {
+  @apply w-full p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all;
+}
+
+/* Loading animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}

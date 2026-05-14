@@ -1,6 +1,6 @@
 // public/api.js - FIXED for Vercel
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000/api'
+  ? 'http://localhost:8000/api'
   : 'https://abc-billing-system.vercel.app/api';
 
 console.log('🌐 API URL:', API_URL);
@@ -8,6 +8,7 @@ console.log('🌐 API URL:', API_URL);
 // Generic fetch wrapper
 async function apiFetch(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  const token = localStorage.getItem('authToken');
   
   const defaultOptions = {
     headers: {
@@ -24,6 +25,10 @@ async function apiFetch(endpoint, options = {}) {
       ...options.headers,
     },
   };
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   
   try {
     console.log(`📡 ${config.method || 'GET'} ${url}`);
