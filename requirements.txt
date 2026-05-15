@@ -7,3 +7,4 @@ PyJWT==2.12.1
 google-auth==2.40.3
 django-redis==6.0.0
 gunicorn==20.1.0
+setuptools
